@@ -1,5 +1,5 @@
 package nf;
-
+//main function
 import java.sql.*;
 import java.util.*;
 

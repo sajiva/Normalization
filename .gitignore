@@ -4,3 +4,8 @@
 .idea/
 *.jar
 out/
+/bin/
+*.
+*.
+.classpath
+.project
