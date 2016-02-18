@@ -1,5 +1,5 @@
 package nf;
-//main function
+
 import java.sql.*;
 import java.util.*;
 
@@ -149,13 +149,23 @@ public class CertifyNF {
     }
 
     public static void main(String[] args) {
-
+    	
+    	//Check database connection
         if (!DbConnection.connect())
             return;
 
+        //Check input database/table
+        ArgPaser.parse(args);
+        ArgPaser.readFile();
+        
+        List<String> tableNames = ArgPaser.tableNames;
+        List<List<String>> candidateKey = ArgPaser.candidateKeys;
+        List<List<String>> nonKeyAttributes = ArgPaser.nonKeyAttributes;
+        /*
         String tableName = "R3";
         List<String> candidateKey = Arrays.asList("N");
         List<String> nonKeyAttributes = Arrays.asList("M", "C");
+        */
         try {
             if (!check1NF_nulls(tableName, candidateKey)) {
                 System.out.println("Table not in 1NF: null keys\n");

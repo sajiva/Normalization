@@ -5,7 +5,6 @@
 *.jar
 out/
 /bin/
-*.
-*.
 .classpath
 .project
+/NormalForms/test
