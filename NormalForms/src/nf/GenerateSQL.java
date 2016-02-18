@@ -82,4 +82,28 @@ public class GenerateSQL {
 
         return sqlQuery.toString();
     }
+    
+    public static String getTableExist(String tableName) {
+		StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT COUNT(*) \n" +
+				"\tFROM Tables \n" + 
+				"\tWHERE table_name=\'"+tableName + "\';\n");
+		
+		writeToFile("\n -- Get queried table\n");
+		writeToFile(sqlQuery.toString());
+		
+		return sqlQuery.toString();
+	}
+    
+    public static String getColumnAndTableExist(String tableName, String columnName) {
+		StringBuilder sqlQuery = new StringBuilder();
+		sqlQuery.append("SELECT COUNT(*) \n" + 
+				"\tFROM Columns \n" +
+				"\tWHERE column_name=\'"+columnName+"\' AND table_name=\'"+tableName+"\';\n");
+		
+		writeToFile("\n -- Check table and columns\n");
+		writeToFile(sqlQuery.toString());
+		
+		return sqlQuery.toString();
+	}
 }

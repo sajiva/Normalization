@@ -147,7 +147,52 @@ public class CertifyNF {
 
         return true;
     }
-
+    
+    // Check the table name exist in the database
+    public static boolean checkTableExist(String tablename){
+    	String sqlQuery = GenerateSQL.getTableExist(tablename);
+    	System.out.println(sqlQuery);
+    	ResultSet rs = DbConnection.executeQuery(sqlQuery);
+    	try {
+    		if (rs.next()) {
+    			if (0 ==rs.getInt(1)) {
+    				System.err.println("Cannot find the table " + tablename);
+    				return false;
+    			}
+    			else {
+    				System.out.println("Table " + tablename + " exists");
+    			}
+			}	
+		} catch (SQLException e) {
+			System.out.println("Wrong in checkTableExist!");
+			e.printStackTrace();
+		}
+		return true;
+	}
+    
+    // Check Column exist
+    public static boolean checkColumnAndTableExist(String tablename, String columnname) {
+    	String sqlQuery = GenerateSQL.getColumnAndTableExist(tablename, columnname);
+    	System.out.println(sqlQuery);
+    	ResultSet rs = DbConnection.executeQuery(sqlQuery);
+    	try {
+    		if (rs.next()) {
+    			if (0 == rs.getInt(1)) {
+    				System.err.println("Cannot find the column "+ columnname +" in table " + tablename);
+    				return false;
+    			}
+    			else {
+    				System.out.println("Column " + columnname + " exists in table " + tablename);
+    			}
+			}	
+		} catch (SQLException e) {
+			System.out.println("Wrong in checkTableExist!");
+			e.printStackTrace();
+		}
+		return true;
+	}
+    
+    
     public static void main(String[] args) {
     	
     	//Check database connection
@@ -161,11 +206,40 @@ public class CertifyNF {
         List<String> tableNames = ArgPaser.tableNames;
         List<List<String>> candidateKey = ArgPaser.candidateKeys;
         List<List<String>> nonKeyAttributes = ArgPaser.nonKeyAttributes;
+        
+        //Check table;
+        for(String tbname: tableNames){
+        	if (!checkTableExist(tbname)) {
+				System.err.println("The table " + tbname + " is not existed");
+			}
+        }
+        
+        //Check attribute
+        for(int i = 0; i < tableNames.size(); i++){
+        	String tablename = tableNames.get(i);
+        	List<String> ck = candidateKey.get(i);
+        	List<String> nk = nonKeyAttributes.get(i);
+        	
+        	for (int j = 0; j < ck.size(); j++) {
+        		String columnname = ck.get(j);
+				if (!checkColumnAndTableExist(tablename, columnname)) {
+					System.err.println("The column " + columnname + " in table " + tablename + " is not existed");
+				}
+			}
+        	
+        	for (int j = 0; j < nk.size(); j++) {
+        		String columnname = nk.get(j);
+				if (!checkColumnAndTableExist(tablename, columnname)) {
+					System.err.println("The column " + columnname + " in table " + tablename + " is not existed");
+				}
+			}
+        }
         /*
         String tableName = "R3";
         List<String> candidateKey = Arrays.asList("N");
         List<String> nonKeyAttributes = Arrays.asList("M", "C");
         */
+        
         try {
             if (!check1NF_nulls(tableName, candidateKey)) {
                 System.out.println("Table not in 1NF: null keys\n");
@@ -187,7 +261,7 @@ public class CertifyNF {
             e.printStackTrace();
             return;
         }
-
+        
 
 //        tableName = "R2";
 //        candidateKey = Arrays.asList("N");
