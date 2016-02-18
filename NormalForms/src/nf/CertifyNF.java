@@ -241,21 +241,24 @@ public class CertifyNF {
         */
         
         try {
-            if (!check1NF_nulls(tableName, candidateKey)) {
-                System.out.println("Table not in 1NF: null keys\n");
-            }
-            else if (!check1NF_duplicates(tableName, candidateKey)) {
-                System.out.println("Table not in 1NF: duplicate keys\n");
-            }
-            else if (!check2NF(tableName, candidateKey, nonKeyAttributes)){
-                System.out.println("Table not in 2NF\n");
-            }
-            else if (!check3NF(tableName, nonKeyAttributes)) {
-                System.out.println("Table not in 3NF\n");
-            }
-            else {
-                System.out.println("Table is in 3NF\n");
-            }
+        	for (int i = 0; i < tableNames.size(); i++) {
+        		if (!check1NF_nulls(tableNames.get(i), candidateKey.get(i))) {
+                    System.out.println("Table not in 1NF: null keys\n");
+                }
+                else if (!check1NF_duplicates(tableNames.get(i), candidateKey.get(i))) {
+                    System.out.println("Table not in 1NF: duplicate keys\n");
+                }
+                else if (!check2NF(tableNames.get(i), candidateKey.get(i), nonKeyAttributes.get(i))){
+                    System.out.println("Table not in 2NF\n");
+                }
+                else if (!check3NF(tableNames.get(i), nonKeyAttributes.get(i))) {
+                    System.out.println("Table not in 3NF\n");
+                }
+                else {
+                    System.out.println("Table is in 3NF\n");
+                }
+			}
+            
         } catch (SQLException e) {
             System.err.println("Could not execute query");
             e.printStackTrace();
