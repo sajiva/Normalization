@@ -45,11 +45,11 @@ public class CertifyNF {
         return totalCount == ckCount;
     }
 
-    public static boolean check2NF(String tableName, List<String> candidateKey, List<String> nonKeyAttributes) throws SQLException {
+    public static Map<List<String>, List<String>> check2NF(String tableName, List<String> candidateKey, List<String> nonKeyAttributes) throws SQLException {
 
-        if (candidateKey.size() == 1)
-            return true;
-        else {
+        Map<List<String>, List<String>> mapFDs = new HashMap<>();
+
+        if (candidateKey.size() > 1) {
             // check FD's against individual candidate key
             for (String cK : candidateKey) {
                 String sqlQuery = GenerateSQL.getDistinctCount(tableName, cK);
@@ -73,15 +73,26 @@ public class CertifyNF {
                         nkCount = rs.getInt(1);
                     }
 
-                    if (ckCount == nkCount)
-                        return false;
+                    if (ckCount == nkCount) {
+                        if (mapFDs.containsKey(Arrays.asList(cK))){
+                            List<String> nonKeys = new ArrayList<>();
+                            nonKeys.addAll(mapFDs.get(Arrays.asList(cK)));
+                            nonKeys.add(nonKey);
+                            mapFDs.replace(Arrays.asList(cK), nonKeys);
+                        }
+                        else {
+                            mapFDs.put(Arrays.asList(cK), Arrays.asList(nonKey));
+                        }
+                    }
+
                 }
             }
 
             // check against subset of candidate keys
             if (candidateKey.size() > 2) {
                 for (int i = 0; i < candidateKey.size(); i++) {
-                    String sqlQuery = GenerateSQL.getDistinctCount(tableName, Arrays.asList(candidateKey.get(i), candidateKey.get((i+1) % 3)));
+                    List<String> subsetCK = Arrays.asList(candidateKey.get(i), candidateKey.get((i+1) % 3));
+                    String sqlQuery = GenerateSQL.getDistinctCount(tableName, subsetCK);
                     System.out.println(sqlQuery);
                     ResultSet rs = DbConnection.executeQuery(sqlQuery);
                     int ckCount = 0;
@@ -92,7 +103,7 @@ public class CertifyNF {
                     }
 
                     for (String nonKey : nonKeyAttributes) {
-                        sqlQuery = GenerateSQL.getDistinctCount(tableName, Arrays.asList(candidateKey.get(i), candidateKey.get(i+1), nonKey));
+                        sqlQuery = GenerateSQL.getDistinctCount(tableName, Arrays.asList(candidateKey.get(i), candidateKey.get((i+1) % 3), nonKey));
                         System.out.println(sqlQuery);
                         rs = DbConnection.executeQuery(sqlQuery);
                         int nkCount = 0;
@@ -102,13 +113,21 @@ public class CertifyNF {
                             nkCount = rs.getInt(1);
                         }
 
-                        if (ckCount == nkCount)
-                            return false;
+                        if (ckCount == nkCount) {
+                            if (mapFDs.containsKey(subsetCK)){
+                                List<String> nonKeys = mapFDs.get(subsetCK);
+                                nonKeys.add(nonKey);
+                                mapFDs.replace(subsetCK, nonKeys);
+                            }
+                            else {
+                                mapFDs.put(subsetCK, Arrays.asList(nonKey));
+                            }
+                        }
                     }
                 }
             }
         }
-        return true;
+        return mapFDs;
     }
 
     public static boolean check3NF(String tableName, List<String> nonKeyAttributes) throws SQLException {
@@ -245,6 +264,7 @@ public class CertifyNF {
             String tableName = tableNames.get(i);
             List<String> candidateKey = candidateKeys.get(i);
             List<String> nonKey = nonKeyAttributes.get(i);
+            Map<List<String>, List<String>> partialFD;
 
             try {
                 if (checkTableExist(tableName)) {
@@ -252,15 +272,34 @@ public class CertifyNF {
                         if (checkColumnAndTableExist(tableName, nonKey)) {
                             if (!check1NF_nulls(tableName, candidateKey)) {
                                 System.err.println("Table " + tableName + " not in 1NF: null keys\n");
-                            } else if (!check1NF_duplicates(tableName, candidateKey)) {
-                                System.out.println("Table " + tableName + " not in 1NF: duplicate keys\n");
-                            } else if (!check2NF(tableName, candidateKey, nonKey)) {
-                                System.out.println("Table " + tableName + " not in 2NF\n");
-                            } else if (!check3NF(tableName, nonKey)) {
-                                System.out.println("Table " + tableName + " not in 3NF\n");
-                            } else {
-                                System.out.println("Table " + tableName + " is in 3NF\n");
                             }
+                            else if (!check1NF_duplicates(tableName, candidateKey)) {
+                                System.out.println("Table " + tableName + " not in 1NF: duplicate keys\n");
+                            }
+                            else {
+                                partialFD = check2NF(tableName, candidateKey, nonKey);
+                                if (!partialFD.isEmpty()) {
+                                    System.out.println("Table " + tableName + " not in 2NF\n");
+                                    for (Map.Entry<List<String>, List<String>> entry : partialFD.entrySet()) {
+                                        System.out.println();
+                                        for (String key : entry.getKey()) {
+                                            System.out.print(key + " ");
+                                        }
+                                        System.out.print("->");
+                                        for (String nKey : entry.getValue()) {
+                                            System.out.print(" " + nKey);
+                                        }
+                                        System.out.println();
+                                    }
+                                }
+                                else if (!check3NF(tableName, nonKey)) {
+                                    System.out.println("Table " + tableName + " not in 3NF\n");
+                                }
+                                else {
+                                    System.out.println("Table " + tableName + " is in 3NF\n");
+                                }
+                            }
+
                         }
                     }
                 }
