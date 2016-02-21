@@ -6,6 +6,9 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -74,7 +77,8 @@ public class CertifyNFTest {
     @Test
     public void testCheck2NF() {
         try {
-            assertTrue(CertifyNF.check2NF("R2", Arrays.asList("N"), Arrays.asList("M","C")));
+            Map<List<String>,List<String>> mapFD = new HashMap<>();
+            assertEquals(CertifyNF.check2NF("R2", Arrays.asList("N"), Arrays.asList("M", "C")), mapFD);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -83,7 +87,11 @@ public class CertifyNFTest {
     @Test
     public void testCheck2NF2() {
         try {
-            assertFalse(CertifyNF.check2NF("R1", Arrays.asList("N", "A", "B"), Arrays.asList("C")));
+            Map<List<String>,List<String>> mapFD = new HashMap<>();
+            mapFD.put(Arrays.asList("B"), Arrays.asList("C"));
+            mapFD.put(Arrays.asList("A", "B"), Arrays.asList("C"));
+            mapFD.put(Arrays.asList("B", "N"), Arrays.asList("C"));
+            assertEquals(CertifyNF.check2NF("R1", Arrays.asList("N", "A", "B"), Arrays.asList("C")), mapFD);
         } catch (SQLException e) {
             e.printStackTrace();
         }
