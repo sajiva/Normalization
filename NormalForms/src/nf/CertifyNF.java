@@ -192,6 +192,8 @@ public class CertifyNF {
 		return true;
 	}
     
+    // Decomposition
+    
     
     public static void main(String[] args) {
     	
