@@ -76,8 +76,9 @@ public class CertifyNFTest {
 
     @Test
     public void testCheck2NF() {
+        Map<List<String>,List<String>> mapFD = new HashMap<>();
+
         try {
-            Map<List<String>,List<String>> mapFD = new HashMap<>();
             assertEquals(CertifyNF.check2NF("R2", Arrays.asList("N"), Arrays.asList("M", "C")), mapFD);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -86,11 +87,13 @@ public class CertifyNFTest {
 
     @Test
     public void testCheck2NF2() {
+
+        Map<List<String>,List<String>> mapFD = new HashMap<>();
+        mapFD.put(Arrays.asList("B"), Arrays.asList("C"));
+        mapFD.put(Arrays.asList("A", "B"), Arrays.asList("C"));
+        mapFD.put(Arrays.asList("B", "N"), Arrays.asList("C"));
+
         try {
-            Map<List<String>,List<String>> mapFD = new HashMap<>();
-            mapFD.put(Arrays.asList("B"), Arrays.asList("C"));
-            mapFD.put(Arrays.asList("A", "B"), Arrays.asList("C"));
-            mapFD.put(Arrays.asList("B", "N"), Arrays.asList("C"));
             assertEquals(CertifyNF.check2NF("R1", Arrays.asList("N", "A", "B"), Arrays.asList("C")), mapFD);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -99,8 +102,10 @@ public class CertifyNFTest {
 
     @Test
     public void testCheck3NF() {
+        Map<List<String>,List<String>> mapFD = new HashMap<>();
+
         try {
-            assertTrue(CertifyNF.check3NF("R1", Arrays.asList("C")));
+            assertEquals(CertifyNF.check3NF("R1", Arrays.asList("C")), mapFD);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -108,8 +113,12 @@ public class CertifyNFTest {
 
     @Test
     public void testCheck3NF2() {
+        Map<List<String>,List<String>> mapFD = new HashMap<>();
+        mapFD.put(Arrays.asList("C"), Arrays.asList("M"));
+        mapFD.put(Arrays.asList("M"), Arrays.asList("C"));
+
         try {
-            assertFalse(CertifyNF.check3NF("R2", Arrays.asList("M", "C")));
+            assertEquals(CertifyNF.check3NF("R2", Arrays.asList("M", "C")), mapFD);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -117,8 +126,9 @@ public class CertifyNFTest {
 
     @Test
     public void testCheck3NF3() {
+        Map<List<String>,List<String>> mapFD = new HashMap<>();
         try {
-            assertTrue(CertifyNF.check3NF("R3", Arrays.asList("M", "C")));
+            assertEquals(CertifyNF.check3NF("R3", Arrays.asList("M", "C")), mapFD);
         } catch (SQLException e) {
             e.printStackTrace();
         }
