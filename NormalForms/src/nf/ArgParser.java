@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.*;
 
 
-public class ArgPaser {
+public class ArgParser {
 	public static List<String> tableNames = new ArrayList<String>();
 	public static List<List<String>> candidateKeys = new ArrayList<List<String>>();
 	public static List<List<String>> nonKeyAttributes = new ArrayList<List<String>>();
