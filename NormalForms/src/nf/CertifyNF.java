@@ -140,7 +140,6 @@ public class CertifyNF {
                         if (count1 == count2)
                             return false;
                     }
-
                 }
             }
         }
@@ -149,120 +148,86 @@ public class CertifyNF {
     }
     
     // Check the table name exist in the database
-    public static boolean checkTableExist(String tablename){
-    	String sqlQuery = GenerateSQL.getTableExist(tablename);
+    public static boolean checkTableExist(String tableName) throws SQLException {
+
+        String sqlQuery = GenerateSQL.getTableExist(tableName);
     	System.out.println(sqlQuery);
     	ResultSet rs = DbConnection.executeQuery(sqlQuery);
-    	try {
-    		if (rs.next()) {
-    			if (0 ==rs.getInt(1)) {
-    				System.err.println("Cannot find the table " + tablename);
-    				return false;
-    			}
-    			else {
-    				System.out.println("Table " + tablename + " exists");
-    			}
-			}	
-		} catch (SQLException e) {
-			System.out.println("Wrong in checkTableExist!");
-			e.printStackTrace();
-		}
+
+        if (rs.next()) {
+            if (0 ==rs.getInt(1)) {
+                System.err.println("Cannot find the table " + tableName);
+                return false;
+            }
+        }
+
 		return true;
 	}
     
     // Check Column exist
-    public static boolean checkColumnAndTableExist(String tablename, String columnname) {
-    	String sqlQuery = GenerateSQL.getColumnAndTableExist(tablename, columnname);
-    	System.out.println(sqlQuery);
-    	ResultSet rs = DbConnection.executeQuery(sqlQuery);
-    	try {
-    		if (rs.next()) {
-    			if (0 == rs.getInt(1)) {
-    				System.err.println("Cannot find the column "+ columnname +" in table " + tablename);
-    				return false;
-    			}
-    			else {
-    				System.out.println("Column " + columnname + " exists in table " + tablename);
-    			}
-			}	
-		} catch (SQLException e) {
-			System.out.println("Wrong in checkTableExist!");
-			e.printStackTrace();
-		}
+    public static boolean checkColumnAndTableExist(String tableName, List<String> columnNames) throws SQLException {
+
+        for (String columnName : columnNames) {
+            String sqlQuery = GenerateSQL.getColumnAndTableExist(tableName, columnName);
+            System.out.println(sqlQuery);
+            ResultSet rs = DbConnection.executeQuery(sqlQuery);
+
+            if (rs.next()) {
+                if (0 == rs.getInt(1)) {
+                    System.err.println("Cannot find the column " + columnName + " in table " + tableName);
+                    return false;
+                }
+            }
+        }
+
 		return true;
 	}
     
     
     public static void main(String[] args) {
-    	
+
+        // Parse input argument
+        if(!ArgParser.parse(args))
+            return;
+
+        // Read input file and extract table and columns details
+        ArgParser.readFile();
+        List<String> tableNames = ArgParser.tableNames;
+        List<List<String>> candidateKeys = ArgParser.candidateKeys;
+        List<List<String>> nonKeyAttributes = ArgParser.nonKeyAttributes;
+
     	//Check database connection
         if (!DbConnection.connect())
             return;
 
-        //Check input database/table
-        ArgPaser.parse(args);
-        ArgPaser.readFile();
-        
-        List<String> tableNames = ArgPaser.tableNames;
-        List<List<String>> candidateKey = ArgPaser.candidateKeys;
-        List<List<String>> nonKeyAttributes = ArgPaser.nonKeyAttributes;
-        
-        //Check table;
-        for(String tbname: tableNames){
-        	if (!checkTableExist(tbname)) {
-				System.err.println("The table " + tbname + " is not existed");
-			}
-        }
-        
-        //Check attribute
-        for(int i = 0; i < tableNames.size(); i++){
-        	String tablename = tableNames.get(i);
-        	List<String> ck = candidateKey.get(i);
-        	List<String> nk = nonKeyAttributes.get(i);
-        	
-        	for (int j = 0; j < ck.size(); j++) {
-        		String columnname = ck.get(j);
-				if (!checkColumnAndTableExist(tablename, columnname)) {
-					System.err.println("The column " + columnname + " in table " + tablename + " is not existed");
-				}
-			}
-        	
-        	for (int j = 0; j < nk.size(); j++) {
-        		String columnname = nk.get(j);
-				if (!checkColumnAndTableExist(tablename, columnname)) {
-					System.err.println("The column " + columnname + " in table " + tablename + " is not existed");
-				}
-			}
-        }
-        /*
-        String tableName = "R3";
-        List<String> candidateKey = Arrays.asList("N");
-        List<String> nonKeyAttributes = Arrays.asList("M", "C");
-        */
-        
-        try {
-        	for (int i = 0; i < tableNames.size(); i++) {
-        		if (!check1NF_nulls(tableNames.get(i), candidateKey.get(i))) {
-                    System.out.println("Table not in 1NF: null keys\n");
+
+        for (int i = 0; i < tableNames.size(); i++) {
+            String tableName = tableNames.get(i);
+            List<String> candidateKey = candidateKeys.get(i);
+            List<String> nonKey = nonKeyAttributes.get(i);
+
+            try {
+                if (checkTableExist(tableName)) {
+                    if (checkColumnAndTableExist(tableName, candidateKey)) {
+                        if (checkColumnAndTableExist(tableName, nonKey)) {
+                            if (!check1NF_nulls(tableName, candidateKey)) {
+                                System.err.println("Table " + tableName + " not in 1NF: null keys\n");
+                            } else if (!check1NF_duplicates(tableName, candidateKey)) {
+                                System.out.println("Table " + tableName + " not in 1NF: duplicate keys\n");
+                            } else if (!check2NF(tableName, candidateKey, nonKey)) {
+                                System.out.println("Table " + tableName + " not in 2NF\n");
+                            } else if (!check3NF(tableName, nonKey)) {
+                                System.out.println("Table " + tableName + " not in 3NF\n");
+                            } else {
+                                System.out.println("Table " + tableName + " is in 3NF\n");
+                            }
+                        }
+                    }
                 }
-                else if (!check1NF_duplicates(tableNames.get(i), candidateKey.get(i))) {
-                    System.out.println("Table not in 1NF: duplicate keys\n");
-                }
-                else if (!check2NF(tableNames.get(i), candidateKey.get(i), nonKeyAttributes.get(i))){
-                    System.out.println("Table not in 2NF\n");
-                }
-                else if (!check3NF(tableNames.get(i), nonKeyAttributes.get(i))) {
-                    System.out.println("Table not in 3NF\n");
-                }
-                else {
-                    System.out.println("Table is in 3NF\n");
-                }
-			}
-            
-        } catch (SQLException e) {
-            System.err.println("Could not execute query");
-            e.printStackTrace();
-            return;
+            } catch (SQLException e) {
+                System.err.println("Could not execute query");
+                e.printStackTrace();
+            }
         }
         
 
