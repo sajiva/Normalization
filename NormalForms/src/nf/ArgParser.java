@@ -15,7 +15,7 @@ public class ArgParser {
 	
 	// parse argument
 	public static boolean parse(String[] args) {
-		//check args should be 1
+		//check argument number should be 1
 		if (1 !=args.length) {
 			System.err.println("The number of argument is wrong! The syntax should be: CertifyNF database=dbnametxt");
 			return false;
@@ -34,6 +34,7 @@ public class ArgParser {
 	}
 	
 	// read file
+	@SuppressWarnings("resource")
 	public static boolean readFile() {
 		try {
 			FileReader fileReader = new FileReader(txtname);
