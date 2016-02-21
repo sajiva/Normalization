@@ -184,7 +184,13 @@ public class CertifyNF {
 	}
     
     // Decomposition
-    
+    public static void decompose() {
+		// Identify each partial FD
+    	// Remove the attributes that depend on each of the determinants so identified
+    	// Place these determinants in separate relations along with their dependent attributes
+    	// In original relation keep the composite key and any attributes that are fully functionally dependent on all of it
+    	// Even if the composite key has no dependent attributes, keep that relation to connect logically the others
+	}
     
     public static void main(String[] args) {
 
