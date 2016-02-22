@@ -268,12 +268,20 @@ public class CertifyNF {
     	allattributesSet.addAll(nckSet);
     	
     	System.out.println(allattributesSet);
+    	
+    	// Split Partial Functional Dependency
+    	Map<List<String>, List<String>> splitedPartialFD = partialFD;
+    	
+    	if (checkclosure(allattributesSet, candidateKey, splitedPartialFD)) {
+			
+		}
     	// Remove the attributes that depend on each of the determinants so identified
     	// Place these determinants in separate relations along with their dependent attributes
     	// In original relation keep the composite key and any attributes that are fully functionally dependent on all of it
     	// Even if the composite key has no dependent attributes, keep that relation to connect logically the others
 	}
     
+    /*
     public static Map<List<String>, List<String>> getSplitFD(Map<List<String>, List<String>> partialFD) {
 		Map<List<String>, List<String>> newSplittedFD  = new HashMap<List<String>, List<String>>();
 		for(Map.Entry<List<String>, List<String>> entry: partialFD.entrySet()){
@@ -285,15 +293,29 @@ public class CertifyNF {
 		}
 		
 		return newSplittedFD;
-	}
+	}*/
     
-    public static boolean checkclosure(List<String> attribute, Map<List<String>, List<String>> splitedPartialFD) {
+    public static boolean checkclosure(Set<String> allattributesSet, List<String> keys, Map<List<String>, List<String>> splitedPartialFD) {
+    	Set<String> closure = getClosure(keys, splitedPartialFD);
+    	if (!allattributesSet.equals(closure)) {
+    		System.err.println("Not sufficient!");
+			return false;
+		}
 		return true;
 	}
     
-    /*public static TreeSet<String> getClosure() {
-		
-	}*/
+    // get the closure of a set of attributes
+    public static Set<String> getClosure(List<String> attribute, Map<List<String>, List<String>> splitedPartialFD) {
+		//initialization
+    	Set<String> closure = new HashSet<String>(attribute);
+    	boolean flag = true;
+		while (flag) {
+			// get all candidate of closure
+			
+		}
+		return closure;
+	}
+    
     // verify the decomposition
     public static boolean decompositionVerify() {
 		return true;
