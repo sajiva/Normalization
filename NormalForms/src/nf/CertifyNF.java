@@ -308,12 +308,35 @@ public class CertifyNF {
     public static Set<String> getClosure(List<String> attribute, Map<List<String>, List<String>> splitedPartialFD) {
 		//initialization
     	Set<String> closure = new HashSet<String>(attribute);
+    	
     	boolean flag = true;
 		while (flag) {
 			// get all candidate of closure
-			
+			List<ArrayList<String>> subsetList = getSubset(closure); 
 		}
 		return closure;
+	}
+    
+    // get subset from closure
+    public static List<ArrayList<String>> getSubset( Set<String> closure) {
+		List<ArrayList<String>> subsets = new ArrayList<ArrayList<String>>();
+		ArrayList<String> elementList = new ArrayList<String>(closure);
+		System.out.println(elementList);
+		subsets.add(new ArrayList<>());
+		//subsets.add(elementList);
+		
+		for (int i = 0; i < elementList.size(); i++) {
+			int curSize = subsets.size();
+			for (int j = 0; j < curSize; j++) {
+				ArrayList<String> curList = new ArrayList<String>(subsets.get(j));
+				curList.add(elementList.get(i));
+				subsets.add(curList);
+			}
+		}
+		
+		subsets.remove(0);
+		System.out.println(subsets);
+		return subsets;
 	}
     
     // verify the decomposition
