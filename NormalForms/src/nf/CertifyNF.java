@@ -258,12 +258,45 @@ public class CertifyNF {
 	}
     
     // Decomposition
-    public static void decompose() {
-		// Identify each partial FD
+    public static void decompose(String tabName, List<String> candidateKey, List<String> nonKeyAttribute, Map<List<String>, List<String>> partialFD) {
+		// Identify each partial FD: Already done in previous step
+    	// initialization
+    	Set<String> ckSet = new HashSet<String>(candidateKey);
+    	Set<String> nckSet = new HashSet<String>(nonKeyAttribute);
+    	Set<String> allattributesSet = new HashSet<>();
+    	allattributesSet.addAll(ckSet);
+    	allattributesSet.addAll(nckSet);
+    	
+    	System.out.println(allattributesSet);
     	// Remove the attributes that depend on each of the determinants so identified
     	// Place these determinants in separate relations along with their dependent attributes
     	// In original relation keep the composite key and any attributes that are fully functionally dependent on all of it
     	// Even if the composite key has no dependent attributes, keep that relation to connect logically the others
+	}
+    
+    public static Map<List<String>, List<String>> getSplitFD(Map<List<String>, List<String>> partialFD) {
+		Map<List<String>, List<String>> newSplittedFD  = new HashMap<List<String>, List<String>>();
+		for(Map.Entry<List<String>, List<String>> entry: partialFD.entrySet()){
+			// split functional dependency so that FD has a single attribute on the right
+			for(String nkey: entry.getValue()){
+				List<String> key = entry.getKey();
+				//newSplittedFD.put(key, value)
+			}
+		}
+		
+		return newSplittedFD;
+	}
+    
+    public static boolean checkclosure(List<String> attribute, Map<List<String>, List<String>> splitedPartialFD) {
+		return true;
+	}
+    
+    /*public static TreeSet<String> getClosure() {
+		
+	}*/
+    // verify the decomposition
+    public static boolean decompositionVerify() {
+		return true;
 	}
     
     public static void main(String[] args) {
@@ -315,6 +348,8 @@ public class CertifyNF {
                                         }
                                         System.out.println();
                                     }
+                                    // decompose the table
+                                    decompose(tableName, candidateKey, nonKey, partialFD);
                                 }
                                 else {
                                     transitiveFD = check3NF(tableName, nonKey);
