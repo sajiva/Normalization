@@ -273,7 +273,7 @@ public class CertifyNF {
     	Map<List<String>, List<String>> splitedPartialFD = partialFD;
     	
     	if (checkclosure(allattributesSet, candidateKey, splitedPartialFD)) {
-			
+			System.out.println("Hello World");
 		}
     	// Remove the attributes that depend on each of the determinants so identified
     	// Place these determinants in separate relations along with their dependent attributes
@@ -300,6 +300,8 @@ public class CertifyNF {
     	if (!allattributesSet.equals(closure)) {
     		System.err.println("Not sufficient!");
 			return false;
+		}else {
+			System.out.println("Sufficient!");
 		}
 		return true;
 	}
@@ -311,8 +313,20 @@ public class CertifyNF {
     	
     	boolean flag = true;
 		while (flag) {
+			Set<String> tempClosure = closure;
 			// get all candidate of closure
-			List<ArrayList<String>> subsetList = getSubset(closure); 
+			List<ArrayList<String>> subsetList = getSubset(closure);
+			// add new element into the set
+			for (ArrayList<String> subset: subsetList) {
+				List<String> element = splitedPartialFD.get(subset);
+				if (element != null) {
+					closure.addAll(element);
+					System.out.println(closure);
+				}	
+			}
+			if (tempClosure.equals(closure)) {
+				flag = false;
+			}
 		}
 		return closure;
 	}
