@@ -441,7 +441,10 @@ public class CertifyNF {
     
     // verify the decomposition
     public static boolean decompositionVerify(Map<List<String>, List<String>> relations) {
-    	
+    	for(Entry<List<String>, List<String>> entry: relations.entrySet()){
+    		List<String> ck = entry.getKey();
+    		List<String> nk = entry.getValue();
+    	}
 		return true;
 	}
     
