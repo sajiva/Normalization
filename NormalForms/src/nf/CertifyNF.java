@@ -47,7 +47,8 @@ public class CertifyNF {
 
     public static Map<List<String>, List<String>> check2NF(String tableName, List<String> candidateKey, List<String> nonKeyAttributes) throws SQLException {
 
-        Map<List<String>, List<String>> mapFDs = new HashMap<>();
+        //Map<List<String>, List<String>> mapFDs = new HashMap<>();
+    	Map<List<String>, List<String>> mapFDs = new LinkedHashMap<>();
 
         if (candidateKey.size() > 1) {
             // check FD's against individual candidate key
@@ -258,7 +259,8 @@ public class CertifyNF {
 	}
     
     // Decomposition
-    public static void decompose(String tabName, List<String> candidateKey, List<String> nonKeyAttribute, Map<List<String>, List<String>> partialFD) {
+    public static void decompose(String tabName, List<String> candidateKey, List<String> nonKeyAttribute, 
+    		Map<List<String>, List<String>> partialFD) throws SQLException {
 		// Identify each partial FD: Already done in previous step
     	// initialization
     	Set<String> ckSet = new HashSet<String>(candidateKey);
@@ -270,25 +272,90 @@ public class CertifyNF {
     	System.out.println(allattributesSet);
     	
     	// Split Partial Functional Dependency
-    	Map<List<String>, List<String>> splitedPartialFD = partialFD;
-    	
+    	//Map<List<String>, List<String>> splitedPartialFD = partialFD;
+    	splitRelation(tabName, candidateKey, nonKeyAttribute, partialFD);
+    	/*
     	if (checkclosure(allattributesSet, candidateKey, splitedPartialFD)) {
 			splitRelation(tabName, candidateKey, nonKeyAttribute, partialFD);
-		}
+		}*/
     	
 	}
     
     // recursively decompose schema
-    public static void splitRelation(String tabName, List<String> candidateKey, List<String> nonKeyAttribute, 
-    		Map<List<String>, List<String>> partialFD) {
+    public static Map<List<String>, List<String>> splitRelation(String tabName, List<String> candidateKey, List<String> nonKeyAttribute, 
+    		Map<List<String>, List<String>> partialFD) throws SQLException {
+    	// get the set
+    	Set<String> ckSet = new HashSet<String>(candidateKey);
+    	Set<String> nckSet = new HashSet<String>(nonKeyAttribute);
+    	Set<String> allSet = new HashSet<>();
+    	allSet.addAll(ckSet);
+    	allSet.addAll(nckSet);
 		// choose one functional dependency.
+    	
     	//// get the first key in the hash map
-    	List<String> ck = partialFD.keySet().iterator().next();
+    	List<String> ck1 = partialFD.keySet().iterator().next();
+    	// do not need to get closure
+    	//Set<String> R1 = getClosure(ck1, partialFD);
     	//// get the value from the hash map
-    	List<String> nck = partialFD.get(ck);
+    	List<String> nck1 = partialFD.get(ck1);
     	/// get the new partial functional dependency
     	
+    	List<String> ck2 = candidateKey;
+    	List<String> nck2 = nonKeyAttribute;
+    	nck2.removeAll(nck1);
+    	
+    	Map<List<String>, List<String>> pFD1 = check2NF(tabName, ck1, nck1);
+    	
+    	System.out.println(Arrays.toString(pFD1.entrySet().toArray()));
+    	
+    	Map<List<String>, List<String>> pFD2 = check2NF(tabName, ck2, nck2);
+    	
+    	System.out.println(Arrays.toString(pFD2.entrySet().toArray()));
+    	
+    	Map<List<String>, List<String>> T = new LinkedHashMap<List<String>, List<String>>();
+    	Map<List<String>, List<String>> T1 = new LinkedHashMap<List<String>, List<String>>();
+    	Map<List<String>, List<String>> T2 = new LinkedHashMap<List<String>, List<String>>();
+    	
+    	if (!pFD1.isEmpty()) {
+			T1 = splitRelation(tabName, ck1, nck1, pFD1);
+			T.putAll(T1);
+		}else {
+			T1.put(ck1, nck1);
+			T.putAll(T1);
+		}
+    	
+    	if (!pFD2.isEmpty()) {
+    		T2 = splitRelation(tabName, ck2, nck2, pFD2);
+    		T.putAll(T2);
+		}else{
+			T2.put(ck2, nck2);
+			T.putAll(T2);
+		}
+    	System.out.println("The map is: ");
+    	System.out.println(Arrays.toString(T.entrySet().toArray()));
+    	
+    	return T; 
 	}
+    /*
+    public static List<String> getCandidateKeyfromSet(Set<String> S, List<String> candidateKeys) {
+		List<String> ck = new ArrayList<String>();
+		for(String attribute: S){
+			if (candidateKeys.contains(attribute)) {
+				ck.add(attribute);
+			}
+		}
+		return ck;
+	}
+    
+    public static List<String> getNonKeyAttributefromSet(Set<String> S, List<String> nonKeyAttribute) {
+		List<String> nk = new ArrayList<String>();
+		for(String attribute: S){
+			if (nonKeyAttribute.contains(attribute)) {
+				nk.add(attribute);
+			}
+		}
+		return nk;
+	}*/
     
     /*
     public static Map<List<String>, List<String>> getSplitFD(Map<List<String>, List<String>> partialFD) {
@@ -394,6 +461,10 @@ public class CertifyNF {
             String tableName = tableNames.get(i);
             List<String> candidateKey = candidateKeys.get(i);
             List<String> nonKey = nonKeyAttributes.get(i);
+            // sort it alphabetically
+            java.util.Collections.sort(candidateKey);
+            java.util.Collections.sort(nonKey);
+            
             Map<List<String>, List<String>> partialFD;
             Map<List<String>, List<String>> transitiveFD;
 
