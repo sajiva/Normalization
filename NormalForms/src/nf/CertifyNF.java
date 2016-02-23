@@ -460,9 +460,9 @@ public class CertifyNF {
     		for(Entry<List<String>, List<String>> entry : relation.entrySet()) {  
                 //System.out.println(entry.getKey()+"："+entry.getValue());
     			j++;
-    			Output.writeResult(" T"+j+"(");
+    			Output.writeResult(" "+decomposedTableNameList.get(iter)+j+"(");
     			
-    			stringBuilder.append("T"+ j + ",");
+    			stringBuilder.append(decomposedTableNameList.get(iter)+ j + ",");
     			
     			List<String> ck = entry.getKey();
     			List<String> nk = entry.getValue();
