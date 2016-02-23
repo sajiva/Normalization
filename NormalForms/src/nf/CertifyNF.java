@@ -1,7 +1,9 @@
 package nf;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
+import java.util.Map.Entry;
 
 public class CertifyNF {
 
@@ -259,7 +261,7 @@ public class CertifyNF {
 	}
     
     // Decomposition
-    public static void decompose(String tabName, List<String> candidateKey, List<String> nonKeyAttribute, 
+    public static Map<List<String>, List<String>> decompose(String tabName, List<String> candidateKey, List<String> nonKeyAttribute, 
     		Map<List<String>, List<String>> partialFD) throws SQLException {
 		// Identify each partial FD: Already done in previous step
     	// initialization
@@ -273,12 +275,12 @@ public class CertifyNF {
     	
     	// Split Partial Functional Dependency
     	//Map<List<String>, List<String>> splitedPartialFD = partialFD;
-    	splitRelation(tabName, candidateKey, nonKeyAttribute, partialFD);
+    	Map<List<String>, List<String>> relations = splitRelation(tabName, candidateKey, nonKeyAttribute, partialFD);
     	/*
     	if (checkclosure(allattributesSet, candidateKey, splitedPartialFD)) {
 			splitRelation(tabName, candidateKey, nonKeyAttribute, partialFD);
 		}*/
-    	
+    	return relations;
 	}
     
     // recursively decompose schema
@@ -440,7 +442,46 @@ public class CertifyNF {
 		return true;
 	}
     
-    public static void main(String[] args) {
+    // print decomposition
+    public static void printDecomposition(List<Map<List<String>, List<String>>> decompositionList, 
+    		List<String> decomposedTableNameList) throws IOException {
+    	
+    	for(int iter = 0; iter <decomposedTableNameList.size(); iter++){
+        	Output.writeResult("\n" + decomposedTableNameList.get(iter) + " decomposition\n");
+        	Map<List<String>, List<String>> relation = decompositionList.get(iter);
+        	int j = 0;
+    		for(Entry<List<String>, List<String>> entry : relation.entrySet()) {  
+                //System.out.println(entry.getKey()+"："+entry.getValue());
+    			j++;
+    			Output.writeResult(" R"+j+"(");
+    			List<String> ck = entry.getKey();
+    			List<String> nk = entry.getValue();
+    			
+    			for (int i = 0; i < ck.size(); i++) {
+    				if (i == ck.size() - 1) {
+						if (nk.size() == 0) {
+							Output.writeResult(ck.get(i));
+						}else {
+							Output.writeResult(ck.get(i) + ",");
+						}
+					}else {
+						Output.writeResult(ck.get(i)+",");
+					}
+				}
+    			
+    			for (int i = 0; i < nk.size(); i++) {
+    				if (i==nk.size()-1) {
+						Output.writeResult(nk.get(i));
+					}else{
+						Output.writeResult(nk.get(i)+",");
+					}
+				}
+    			Output.writeResult(")\n");
+            } 
+        }
+	}
+    
+    public static void main(String[] args) throws IOException{
 
         // Parse input argument
         if(!ArgParser.parse(args))
@@ -456,6 +497,12 @@ public class CertifyNF {
         if (!DbConnection.connect())
             return;
 
+        // Generate the result file
+        
+        Output.createFile();
+        
+        List<Map<List<String>, List<String>>> decompositionList = new ArrayList<>();
+        List<String> decomposedTableNameList = new ArrayList<>();
 
         for (int i = 0; i < tableNames.size(); i++) {
             String tableName = tableNames.get(i);
@@ -468,51 +515,77 @@ public class CertifyNF {
             Map<List<String>, List<String>> partialFD;
             Map<List<String>, List<String>> transitiveFD;
 
+            Map<List<String>, List<String>> relations;
+            
+            Output.writeResult(tableName);
+            Output.writeResult("\t 3NF");
+            
+            Boolean flag3NF = false;
+//            Boolean flag2NF = false;
+//            Boolean flag1NF = false;
+            
+            String explanation = "";
+            
             try {
                 if (checkTableExist(tableName)) {
                     if (checkColumnAndTableExist(tableName, candidateKey)) {
                         if (checkColumnAndTableExist(tableName, nonKey)) {
                             if (!check1NF_nulls(tableName, candidateKey)) {
-                                System.err.println("Table " + tableName + " not in 1NF: null keys\n");
+                            	explanation = "not in 1NF, null keys\n";
+                                System.out.println("Table " + tableName + " not in 1NF: null keys\n");
                             }
                             else if (!check1NF_duplicates(tableName, candidateKey)) {
+                            	explanation = "not in 1NF, duplicate keys\n";
                                 System.out.println("Table " + tableName + " not in 1NF: duplicate keys\n");
                             }
                             else {
                                 partialFD = check2NF(tableName, candidateKey, nonKey);
                                 if (!partialFD.isEmpty()) {
+                                	explanation = "not in 2NF, ";
                                     System.out.println("Table " + tableName + " not in 2NF\n");
                                     for (Map.Entry<List<String>, List<String>> entry : partialFD.entrySet()) {
 
                                         for (String key : entry.getKey()) {
+                                        	explanation += key + "";
                                             System.out.print(key + " ");
                                         }
+                                        explanation += "->";
                                         System.out.print("->");
                                         for (String nKey : entry.getValue()) {
                                             System.out.print(" " + nKey);
+                                        	explanation += " " + nKey;
                                         }
                                         System.out.println();
+                                        explanation += "; ";
                                     }
                                     // decompose the table
-                                    decompose(tableName, candidateKey, nonKey, partialFD);
+                                    relations = decompose(tableName, candidateKey, nonKey, partialFD);
+                                    decompositionList.add(relations);
+                                    decomposedTableNameList.add(tableName);
                                 }
                                 else {
                                     transitiveFD = check3NF(tableName, nonKey);
                                     if (!transitiveFD.isEmpty()) {
+                                    	explanation = "not in 3NF, ";
                                         System.out.println("Table " + tableName + " not in 3NF\n");
                                         for (Map.Entry<List<String>, List<String>> entry : transitiveFD.entrySet()) {
-
+                                        	
                                             for (String key : entry.getKey()) {
                                                 System.out.print(key + " ");
+                                            	explanation += key + " ";
                                             }
                                             System.out.print("->");
+                                            explanation += "->";
                                             for (String nKey : entry.getValue()) {
                                                 System.out.print(" " + nKey);
+                                            	explanation += " " + nKey;
                                             }
                                             System.out.println();
+                                            explanation +="; ";
                                         }
                                     }
                                     else {
+                                    	flag3NF = true;
                                         System.out.println("Table " + tableName + " is in 3NF\n");
                                     }
                                 }
@@ -524,9 +597,20 @@ public class CertifyNF {
                 System.err.println("Could not execute query");
                 e.printStackTrace();
             }
+            
+            if (flag3NF == true) {
+				Output.writeResult("\tY\n");
+			}else{
+				Output.writeResult("\tN\t" + explanation + "\n");
+			}
+            
         }
 
         DbConnection.closeConnection();
-
+        
+        // print the decomposition
+        printDecomposition(decompositionList, decomposedTableNameList);
+        
+        System.out.println("Done");
     }
 }
