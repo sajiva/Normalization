@@ -3,6 +3,7 @@ package nf;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
+import java.util.Map;
 
 public class GenerateSQL {
 
@@ -106,4 +107,26 @@ public class GenerateSQL {
 		
 		return sqlQuery.toString();
 	}
+
+    public static String createTempTable(String originalTable, String tempTable, List<String> attributesList) {
+
+        StringBuilder sqlQuery = new StringBuilder();
+        sqlQuery.append("CREATE LOCAL TEMP TABLE " + tempTable + " ON COMMIT PRESERVE ROWS AS\n" +
+                "\tSELECT DISTINCT ");
+
+        for (int i = 0; i < attributesList.size(); i++) {
+            sqlQuery.append(attributesList.get(i));
+            if (i < attributesList.size() - 1)
+                sqlQuery.append(", ");
+            else
+                sqlQuery.append("\n");
+        }
+
+        sqlQuery.append("\t\tFROM " + originalTable + ";\n");
+
+        writeToFile("\n -- Create local temporary table \n");
+        writeToFile(sqlQuery.toString());
+
+        return sqlQuery.toString();
+    }
 }

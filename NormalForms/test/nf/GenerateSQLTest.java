@@ -50,4 +50,12 @@ public class GenerateSQLTest {
         assertEquals(GenerateSQL.getDistinctCount("R2", "A"), query);
     }
 
+    @Test
+    public void testBuildQueryCreateTempTable() {
+        String query = "CREATE LOCAL TEMP TABLE R11 ON COMMIT PRESERVE ROWS AS\n" +
+                "\tSELECT DISTINCT N, A, B\n" +
+                "\t\tFROM R1;\n";
+        assertEquals(GenerateSQL.createTempTable("R1", "R11", Arrays.asList("N", "A", "B")), query);
+    }
+
 }
