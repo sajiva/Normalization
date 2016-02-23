@@ -10,11 +10,11 @@ public class CertifyNF {
     public static boolean check1NF_nulls(String tableName, List<String> candidateKey) throws SQLException {
 
         String sqlQuery = GenerateSQL.checkNulls(tableName, candidateKey);
-        System.out.println(sqlQuery);
+        //System.out.println(sqlQuery);
         ResultSet rs = DbConnection.executeQuery(sqlQuery);
 
         if (rs.next()) {
-            System.out.println(rs.getInt(1));
+            //System.out.println(rs.getInt(1));
             if (rs.getInt(1) == 0)
                 return true;
         }
@@ -25,22 +25,22 @@ public class CertifyNF {
     public static boolean check1NF_duplicates(String tableName, List<String> candidateKey) throws SQLException {
 
         String sqlQuery = GenerateSQL.getTotalCount(tableName);
-        System.out.println(sqlQuery);
+        //System.out.println(sqlQuery);
         ResultSet rs = DbConnection.executeQuery(sqlQuery);
         int totalCount = 0;
 
         if (rs.next()) {
-            System.out.println(rs.getInt(1));
+            //System.out.println(rs.getInt(1));
             totalCount = rs.getInt(1);
         }
 
         sqlQuery = GenerateSQL.getDistinctCount(tableName, candidateKey);
-        System.out.println(sqlQuery);
+        //System.out.println(sqlQuery);
         rs = DbConnection.executeQuery(sqlQuery);
         int ckCount = 0;
 
         if (rs.next()) {
-            System.out.println(rs.getInt(1));
+            //System.out.println(rs.getInt(1));
             ckCount = rs.getInt(1);
         }
 
@@ -56,23 +56,23 @@ public class CertifyNF {
             // check FD's against individual candidate key
             for (String cK : candidateKey) {
                 String sqlQuery = GenerateSQL.getDistinctCount(tableName, cK);
-                System.out.println(sqlQuery);
+                //System.out.println(sqlQuery);
                 ResultSet rs = DbConnection.executeQuery(sqlQuery);
                 int ckCount = 0;
 
                 if (rs.next()) {
-                    System.out.println(rs.getInt(1));
+                    //System.out.println(rs.getInt(1));
                     ckCount = rs.getInt(1);
                 }
 
                 for (String nonKey : nonKeyAttributes) {
                     sqlQuery = GenerateSQL.getDistinctCount(tableName, Arrays.asList(cK, nonKey));
-                    System.out.println(sqlQuery);
+                    //System.out.println(sqlQuery);
                     rs = DbConnection.executeQuery(sqlQuery);
                     int nkCount = 0;
 
                     if (rs.next()) {
-                        System.out.println(rs.getInt(1));
+                        //System.out.println(rs.getInt(1));
                         nkCount = rs.getInt(1);
                     }
 
@@ -96,23 +96,23 @@ public class CertifyNF {
                 for (int i = 0; i < candidateKey.size(); i++) {
                     List<String> subsetCK = Arrays.asList(candidateKey.get(i), candidateKey.get((i+1) % 3));
                     String sqlQuery = GenerateSQL.getDistinctCount(tableName, subsetCK);
-                    System.out.println(sqlQuery);
+                    //System.out.println(sqlQuery);
                     ResultSet rs = DbConnection.executeQuery(sqlQuery);
                     int ckCount = 0;
 
                     if (rs.next()) {
-                        System.out.println(rs.getInt(1));
+                        //System.out.println(rs.getInt(1));
                         ckCount = rs.getInt(1);
                     }
 
                     for (String nonKey : nonKeyAttributes) {
                         sqlQuery = GenerateSQL.getDistinctCount(tableName, Arrays.asList(candidateKey.get(i), candidateKey.get((i+1) % 3), nonKey));
-                        System.out.println(sqlQuery);
+                        //System.out.println(sqlQuery);
                         rs = DbConnection.executeQuery(sqlQuery);
                         int nkCount = 0;
 
                         if (rs.next()) {
-                            System.out.println(rs.getInt(1));
+                            //System.out.println(rs.getInt(1));
                             nkCount = rs.getInt(1);
                         }
 
@@ -141,24 +141,24 @@ public class CertifyNF {
             // check FDs against individual non key attributes
             for (String nKey1 : nonKeyAttributes) {
                 String sqlQuery = GenerateSQL.getDistinctCount(tableName, nKey1);
-                System.out.println(sqlQuery);
+                //System.out.println(sqlQuery);
                 ResultSet rs = DbConnection.executeQuery(sqlQuery);
                 int count1 = 0;
 
                 if (rs.next()) {
-                    System.out.println(rs.getInt(1));
+                    //System.out.println(rs.getInt(1));
                     count1 = rs.getInt(1);
                 }
 
                 for (String nKey2 : nonKeyAttributes) {
                     if (!nKey1.equals(nKey2)) {
                         sqlQuery = GenerateSQL.getDistinctCount(tableName, Arrays.asList(nKey1, nKey2));
-                        System.out.println(sqlQuery);
+                        //System.out.println(sqlQuery);
                         rs = DbConnection.executeQuery(sqlQuery);
                         int count2 = 0;
 
                         if (rs.next()) {
-                            System.out.println(rs.getInt(1));
+                            //System.out.println(rs.getInt(1));
                             count2 = rs.getInt(1);
                         }
 
@@ -182,24 +182,24 @@ public class CertifyNF {
                     for (int j = i+1; j < nonKeyAttributes.size(); j++) {
                         List<String> subsetNonKeys = Arrays.asList(nonKeyAttributes.get(i), nonKeyAttributes.get(j));
                         String sqlQuery = GenerateSQL.getDistinctCount(tableName, subsetNonKeys);
-                        System.out.println(sqlQuery);
+                        //System.out.println(sqlQuery);
                         ResultSet rs = DbConnection.executeQuery(sqlQuery);
                         int count1 = 0;
 
                         if (rs.next()) {
-                            System.out.println(rs.getInt(1));
+                            //System.out.println(rs.getInt(1));
                             count1 = rs.getInt(1);
                         }
 
                         for (String nKey : nonKeyAttributes) {
                             if (!nKey.equals(nonKeyAttributes.get(i)) && !nKey.equals(nonKeyAttributes.get(j))) {
                                 sqlQuery = GenerateSQL.getDistinctCount(tableName, Arrays.asList(nonKeyAttributes.get(i), nonKeyAttributes.get(j), nKey));
-                                System.out.println(sqlQuery);
+                                //System.out.println(sqlQuery);
                                 rs = DbConnection.executeQuery(sqlQuery);
                                 int count2 = 0;
 
                                 if (rs.next()) {
-                                    System.out.println(rs.getInt(1));
+                                    //System.out.println(rs.getInt(1));
                                     count2 = rs.getInt(1);
                                 }
 
@@ -228,7 +228,7 @@ public class CertifyNF {
     public static boolean checkTableExist(String tableName) throws SQLException {
 
         String sqlQuery = GenerateSQL.getTableExist(tableName);
-    	System.out.println(sqlQuery);
+    	//System.out.println(sqlQuery);
     	ResultSet rs = DbConnection.executeQuery(sqlQuery);
 
         if (rs.next()) {
@@ -246,7 +246,7 @@ public class CertifyNF {
 
         for (String columnName : columnNames) {
             String sqlQuery = GenerateSQL.getColumnAndTableExist(tableName, columnName);
-            System.out.println(sqlQuery);
+            //System.out.println(sqlQuery);
             ResultSet rs = DbConnection.executeQuery(sqlQuery);
 
             if (rs.next()) {
@@ -265,13 +265,13 @@ public class CertifyNF {
     		Map<List<String>, List<String>> partialFD) throws SQLException {
 		// Identify each partial FD: Already done in previous step
     	// initialization
-    	Set<String> ckSet = new HashSet<String>(candidateKey);
-    	Set<String> nckSet = new HashSet<String>(nonKeyAttribute);
-    	Set<String> allattributesSet = new HashSet<>();
-    	allattributesSet.addAll(ckSet);
-    	allattributesSet.addAll(nckSet);
+    	//Set<String> ckSet = new HashSet<String>(candidateKey);
+    	//Set<String> nckSet = new HashSet<String>(nonKeyAttribute);
+    	//Set<String> allattributesSet = new HashSet<>();
+    	//allattributesSet.addAll(ckSet);
+    	//allattributesSet.addAll(nckSet);
     	
-    	System.out.println(allattributesSet);
+    	//System.out.println(allattributesSet);
     	
     	// Split Partial Functional Dependency
     	//Map<List<String>, List<String>> splitedPartialFD = partialFD;
@@ -308,11 +308,11 @@ public class CertifyNF {
     	
     	Map<List<String>, List<String>> pFD1 = check2NF(tabName, ck1, nck1);
     	
-    	System.out.println(Arrays.toString(pFD1.entrySet().toArray()));
+    	//System.out.println(Arrays.toString(pFD1.entrySet().toArray()));
     	
     	Map<List<String>, List<String>> pFD2 = check2NF(tabName, ck2, nck2);
     	
-    	System.out.println(Arrays.toString(pFD2.entrySet().toArray()));
+    	//System.out.println(Arrays.toString(pFD2.entrySet().toArray()));
     	
     	Map<List<String>, List<String>> T = new LinkedHashMap<List<String>, List<String>>();
     	Map<List<String>, List<String>> T1 = new LinkedHashMap<List<String>, List<String>>();
@@ -333,8 +333,8 @@ public class CertifyNF {
 			T2.put(ck2, nck2);
 			T.putAll(T2);
 		}
-    	System.out.println("The map is: ");
-    	System.out.println(Arrays.toString(T.entrySet().toArray()));
+    	//System.out.println("The map is: ");
+    	//System.out.println(Arrays.toString(T.entrySet().toArray()));
     	
     	return T; 
 	}
@@ -438,23 +438,29 @@ public class CertifyNF {
 		return subsets;
 	}
     */
+    
     // verify the decomposition
-    public static boolean decompositionVerify() {
+    public static boolean decompositionVerify(Map<List<String>, List<String>> relations) {
+    	
 		return true;
 	}
     
     // print decomposition
     public static void printDecomposition(List<Map<List<String>, List<String>>> decompositionList, 
-    		List<String> decomposedTableNameList) throws IOException {
+    		List<String> decomposedTableNameList, List<Boolean> decompositionVerification) throws IOException {
     	
     	for(int iter = 0; iter <decomposedTableNameList.size(); iter++){
-        	Output.writeResult("\n" + decomposedTableNameList.get(iter) + " decomposition\n");
+        	Output.writeResult("\n" + decomposedTableNameList.get(iter) + " decomposition:\n");
         	Map<List<String>, List<String>> relation = decompositionList.get(iter);
         	int j = 0;
+        	StringBuilder stringBuilder = new StringBuilder();
     		for(Entry<List<String>, List<String>> entry : relation.entrySet()) {  
                 //System.out.println(entry.getKey()+"："+entry.getValue());
     			j++;
-    			Output.writeResult(" R"+j+"(");
+    			Output.writeResult(" T"+j+"(");
+    			
+    			stringBuilder.append("T"+ j + ",");
+    			
     			List<String> ck = entry.getKey();
     			List<String> nk = entry.getValue();
     			
@@ -479,6 +485,15 @@ public class CertifyNF {
 				}
     			Output.writeResult(")\n");
             } 
+    		String verifyFlag = "NO";
+    		if (decompositionVerification.get(iter)) {
+				verifyFlag = "YES";
+			}
+    		
+    		stringBuilder.deleteCharAt(stringBuilder.length()-1);
+    		Output.writeResult("Verfication:\n");
+    		Output.writeResult(" "+decomposedTableNameList.get(iter) + " = join(" + stringBuilder.toString()+")? " + verifyFlag);
+    		
         }
 	}
     
@@ -504,6 +519,7 @@ public class CertifyNF {
         
         List<Map<List<String>, List<String>>> decompositionList = new ArrayList<>();
         List<String> decomposedTableNameList = new ArrayList<>();
+        List<Boolean> decompositionVerification = new ArrayList<>();
 
         for (int i = 0; i < tableNames.size(); i++) {
             String tableName = tableNames.get(i);
@@ -526,7 +542,7 @@ public class CertifyNF {
 //            Boolean flag1NF = false;
             
             String explanation = "";
-            
+            System.out.println("\nChecking the talble: " + tableName);
             try {
                 if (checkTableExist(tableName)) {
                     if (checkColumnAndTableExist(tableName, candidateKey)) {
@@ -561,8 +577,10 @@ public class CertifyNF {
                                     }
                                     // decompose the table
                                     relations = decompose(tableName, candidateKey, nonKey, partialFD);
+                                    Boolean flag = decompositionVerify(relations);
                                     decompositionList.add(relations);
                                     decomposedTableNameList.add(tableName);
+                                    decompositionVerification.add(flag);
                                 }
                                 else {
                                     transitiveFD = check3NF(tableName, nonKey);
@@ -610,7 +628,7 @@ public class CertifyNF {
         DbConnection.closeConnection();
         
         // print the decomposition
-        printDecomposition(decompositionList, decomposedTableNameList);
+        printDecomposition(decompositionList, decomposedTableNameList, decompositionVerification);
         
         System.out.println("Done");
     }
