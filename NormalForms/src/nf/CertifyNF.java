@@ -273,12 +273,21 @@ public class CertifyNF {
     	Map<List<String>, List<String>> splitedPartialFD = partialFD;
     	
     	if (checkclosure(allattributesSet, candidateKey, splitedPartialFD)) {
-			System.out.println("Hello World");
+			splitRelation(tabName, candidateKey, nonKeyAttribute, partialFD);
 		}
-    	// Remove the attributes that depend on each of the determinants so identified
-    	// Place these determinants in separate relations along with their dependent attributes
-    	// In original relation keep the composite key and any attributes that are fully functionally dependent on all of it
-    	// Even if the composite key has no dependent attributes, keep that relation to connect logically the others
+    	
+	}
+    
+    // recursively decompose schema
+    public static void splitRelation(String tabName, List<String> candidateKey, List<String> nonKeyAttribute, 
+    		Map<List<String>, List<String>> partialFD) {
+		// choose one functional dependency.
+    	//// get the first key in the hash map
+    	List<String> ck = partialFD.keySet().iterator().next();
+    	//// get the value from the hash map
+    	List<String> nck = partialFD.get(ck);
+    	/// get the new partial functional dependency
+    	
 	}
     
     /*
@@ -304,6 +313,12 @@ public class CertifyNF {
 			System.out.println("Sufficient!");
 		}
 		return true;
+	}
+    
+    // get the difference between set1 and set2
+    public static Set<String> setDifference(Set<String> set1, Set<String> set2) {
+		set1.removeAll(set2);
+		return set1;
 	}
     
     // get the closure of a set of attributes
