@@ -287,11 +287,11 @@ public class CertifyNF {
     public static Map<List<String>, List<String>> splitRelation(String tabName, List<String> candidateKey, List<String> nonKeyAttribute, 
     		Map<List<String>, List<String>> partialFD) throws SQLException {
     	// get the set
-    	Set<String> ckSet = new HashSet<String>(candidateKey);
-    	Set<String> nckSet = new HashSet<String>(nonKeyAttribute);
-    	Set<String> allSet = new HashSet<>();
-    	allSet.addAll(ckSet);
-    	allSet.addAll(nckSet);
+    	//Set<String> ckSet = new HashSet<String>(candidateKey);
+    	//Set<String> nckSet = new HashSet<String>(nonKeyAttribute);
+    	//Set<String> allSet = new HashSet<>();
+    	//allSet.addAll(ckSet);
+    	//allSet.addAll(nckSet);
 		// choose one functional dependency.
     	
     	//// get the first key in the hash map
@@ -372,7 +372,7 @@ public class CertifyNF {
 		
 		return newSplittedFD;
 	}*/
-    
+    /*
     public static boolean checkclosure(Set<String> allattributesSet, List<String> keys, Map<List<String>, List<String>> splitedPartialFD) {
     	Set<String> closure = getClosure(keys, splitedPartialFD);
     	if (!allattributesSet.equals(closure)) {
@@ -382,9 +382,10 @@ public class CertifyNF {
 			System.out.println("Sufficient!");
 		}
 		return true;
-	}
+	}*/
     
     // get the difference between set1 and set2
+    /*
     public static Set<String> setDifference(Set<String> set1, Set<String> set2) {
 		set1.removeAll(set2);
 		return set1;
@@ -436,7 +437,7 @@ public class CertifyNF {
 		System.out.println(subsets);
 		return subsets;
 	}
-    
+    */
     // verify the decomposition
     public static boolean decompositionVerify() {
 		return true;
