@@ -58,4 +58,13 @@ public class GenerateSQLTest {
         assertEquals(GenerateSQL.createTempTable("R1", "R11", Arrays.asList("N", "A", "B")), query);
     }
 
+    @Test
+    public void testBuildQueryGetCountJoinTables() {
+        String query = "SELECT COUNT(*)\n" +
+                "\tFROM R11\n" +
+                "JOIN R12\n" +
+                "\tON R11.B = R12.B;\n";
+        assertEquals(GenerateSQL.getCountJoinTables("R11", "R12", "B"), query);
+    }
+
 }

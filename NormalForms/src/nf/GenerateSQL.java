@@ -129,4 +129,17 @@ public class GenerateSQL {
 
         return sqlQuery.toString();
     }
+
+    public static String getCountJoinTables(String table1, String table2, String joinOn) {
+        StringBuilder sqlQuery = new StringBuilder();
+        sqlQuery.append("SELECT COUNT(*)\n" +
+                "\tFROM " + table1 + "\n" +
+                "JOIN " + table2 + "\n" +
+                "\tON " + table1 + "." + joinOn + " = " + table2 + "." + joinOn + ";\n");
+
+        writeToFile("\n -- Join two tables and get count \n");
+        writeToFile(sqlQuery.toString());
+
+        return sqlQuery.toString();
+    }
 }
