@@ -305,18 +305,22 @@ public class CertifyNF {
     	//allSet.addAll(ckSet);
     	//allSet.addAll(nckSet);
 		// choose one functional dependency.
+
+        List<String> ck1 = candidateKey;
+        List<String> nck1 = nonKeyAttribute;
     	
     	//// get the first key in the hash map
-    	List<String> ck1 = partialFD.keySet().iterator().next();
+    	List<String> ck2 = partialFD.keySet().iterator().next();
     	// do not need to get closure
     	//Set<String> R1 = getClosure(ck1, partialFD);
     	//// get the value from the hash map
-    	List<String> nck1 = partialFD.get(ck1);
+    	List<String> nck2 = partialFD.get(ck2);
     	/// get the new partial functional dependency
     	
-    	List<String> ck2 = candidateKey;
-    	List<String> nck2 = nonKeyAttribute;
-    	nck2.removeAll(nck1);
+//    	List<String> ck2 = candidateKey;
+//    	List<String> nck2 = nonKeyAttribute;
+//    	nck2.removeAll(nck1);
+        nck1.removeAll(nck2);
     	
     	Map<List<String>, List<String>> pFD1 = check2NF(tabName, ck1, nck1);
     	
