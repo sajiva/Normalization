@@ -409,8 +409,8 @@ public class CertifyNF {
 					//System.out.println(closure);
 				}	
 			}
-			System.out.println(closure);
-			System.out.println(tempClosure);
+			//System.out.println(closure);
+			//System.out.println(tempClosure);
 			if (tempClosure.containsAll(closure) && closure.containsAll(tempClosure)) {
 				flag = false;
 			}
@@ -422,7 +422,7 @@ public class CertifyNF {
     public static List<ArrayList<String>> getSubset( Set<String> closure) {
 		List<ArrayList<String>> subsets = new ArrayList<ArrayList<String>>();
 		ArrayList<String> elementList = new ArrayList<String>(closure);
-		System.out.println(elementList);
+		//System.out.println(elementList);
 		subsets.add(new ArrayList<>());
 		//subsets.add(elementList);
 		
@@ -516,18 +516,43 @@ public class CertifyNF {
 		Map<List<String>, List<String>> miniCover = getMinimalBasis(candidateKey, FD);
 		// for each functional dependency, get the schema
 		boolean flag = false;
+		
+		//************Assume candidate key is a superkey****************//
 		Set<String> ckSet = new HashSet<String>(candidateKey);
+		
+		List<Set<String>> currentSetList = new ArrayList<>();
 		
 		for(Entry<List<String>, List<String>> entry: miniCover.entrySet()){
 			Set<String> set = new HashSet<String>(entry.getKey());
-			//************Assume candidate key is a superkey****************//
-			if (set.equals(ckSet)) {
+			set.addAll(entry.getValue());
+			
+			if (currentSetList.size()==0) {
+				currentSetList.add(set);
+				schemaMap.put(entry.getKey(), entry.getValue());
+			}else {
+				boolean addFlag = true;
+				for (int i = 0; i < currentSetList.size(); i++) {
+					Set<String> currentSet = currentSetList.get(i);
+					if (currentSet.containsAll(set)) {
+						addFlag = false;
+					}
+				}
+				if (addFlag) {
+					currentSetList.add(set);
+					//System.out.println(schemaMap);
+					schemaMap.put(entry.getKey(), entry.getValue());
+					//System.out.println(schemaMap);
+				}
+			}
+			
+			
+			if (set.containsAll(ckSet)) {
 				flag = true;
 			}
-			set.addAll(entry.getValue());
 			//schemaList.add(set);
 		}
-		schemaMap = miniCover;
+		
+		//schemaMap = miniCover;
 		// if no R is a superkey, add schema R0 where R0 is a key of R
 		if (!flag) {
 			schemaMap.put(candidateKey, new ArrayList<>());
@@ -567,10 +592,10 @@ public class CertifyNF {
 				for (int j = 0; j < lhs.size(); j++) {
 					List<String> temp = lhs;
 					temp.remove(j);
-					System.out.println(temp);
+					//System.out.println(temp);
 					Set<String> tempClosure = getClosure(temp, FD);
-					System.out.println("Closure: " + tempClosure.toArray());
-					//closureList.add(tempClosure);
+					//System.out.println("Closure: " + tempClosure.toArray());
+					closureList.add(tempClosure);
 				}
 				
 				for (int j = 0; j < closureList.size(); j++){
