@@ -677,6 +677,7 @@ public class CertifyNF {
         // Generate the result file
         
         Output.createFile();
+        GenerateSQL.createFile();
         
         List<Map<List<String>, List<String>>> decompositionList = new ArrayList<>();
         List<String> decomposedTableNameList = new ArrayList<>();
