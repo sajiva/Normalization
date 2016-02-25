@@ -386,60 +386,60 @@ public class CertifyNF {
     
     // get the difference between set1 and set2
     
-    public static Set<String> setDifference(Set<String> set1, Set<String> set2) {
-		set1.removeAll(set2);
-		return set1;
-	}
+//    public static Set<String> setDifference(Set<String> set1, Set<String> set2) {
+//		set1.removeAll(set2);
+//		return set1;
+//	}
     
     // get the closure of a set of attributes
-    public static Set<String> getClosure(List<String> attribute, Map<List<String>, List<String>> FD) {
-		//initialization
-    	Set<String> closure = new HashSet<String>(attribute);
-    	
-    	boolean flag = true;
-		while (flag) {
-			Set<String> tempClosure = new HashSet<String>(closure);
-			// get all candidate of closure
-			List<ArrayList<String>> subsetList = getSubset(closure);
-			// add new element into the set
-			for (ArrayList<String> subset: subsetList) {
-				List<String> element = FD.get(subset);
-				if (element != null) {
-					closure.addAll(element);
-					//System.out.println(closure);
-				}	
-			}
-			//System.out.println(closure);
-			//System.out.println(tempClosure);
-			if (tempClosure.containsAll(closure) && closure.containsAll(tempClosure)) {
-				flag = false;
-			}
-		}
-		return closure;
-	}
-    
+//    public static Set<String> getClosure(List<String> attribute, Map<List<String>, List<String>> FD) {
+//		//initialization
+//    	Set<String> closure = new HashSet<String>(attribute);
+//
+//    	boolean flag = true;
+//		while (flag) {
+//			Set<String> tempClosure = new HashSet<String>(closure);
+//			// get all candidate of closure
+//			List<ArrayList<String>> subsetList = getSubset(closure);
+//			// add new element into the set
+//			for (ArrayList<String> subset: subsetList) {
+//				List<String> element = FD.get(subset);
+//				if (element != null) {
+//					closure.addAll(element);
+//					//System.out.println(closure);
+//				}
+//			}
+//			//System.out.println(closure);
+//			//System.out.println(tempClosure);
+//			if (tempClosure.containsAll(closure) && closure.containsAll(tempClosure)) {
+//				flag = false;
+//			}
+//		}
+//		return closure;
+//	}
+//
     // get subset from closure
-    public static List<ArrayList<String>> getSubset( Set<String> closure) {
-		List<ArrayList<String>> subsets = new ArrayList<ArrayList<String>>();
-		ArrayList<String> elementList = new ArrayList<String>(closure);
-		//System.out.println(elementList);
-		subsets.add(new ArrayList<>());
-		//subsets.add(elementList);
-		
-		for (int i = 0; i < elementList.size(); i++) {
-			int curSize = subsets.size();
-			for (int j = 0; j < curSize; j++) {
-				ArrayList<String> curList = new ArrayList<String>(subsets.get(j));
-				curList.add(elementList.get(i));
-				subsets.add(curList);
-			}
-		}
-		
-		subsets.remove(0);
-		//System.out.println(subsets);
-		return subsets;
-	}
-    
+//    public static List<ArrayList<String>> getSubset( Set<String> closure) {
+//		List<ArrayList<String>> subsets = new ArrayList<ArrayList<String>>();
+//		ArrayList<String> elementList = new ArrayList<String>(closure);
+//		//System.out.println(elementList);
+//		subsets.add(new ArrayList<>());
+//		//subsets.add(elementList);
+//
+//		for (int i = 0; i < elementList.size(); i++) {
+//			int curSize = subsets.size();
+//			for (int j = 0; j < curSize; j++) {
+//				ArrayList<String> curList = new ArrayList<String>(subsets.get(j));
+//				curList.add(elementList.get(i));
+//				subsets.add(curList);
+//			}
+//		}
+//
+//		subsets.remove(0);
+//		//System.out.println(subsets);
+//		return subsets;
+//	}
+//
     
     // verify the decomposition
     public static boolean decompositionVerify(Map<List<String>, List<String>> relations) {
@@ -503,160 +503,160 @@ public class CertifyNF {
 	}
     
     // decompose the table into 3NF.
-    public static Map<List<String>, List<String>> decomposeTo3NF(String tabName, List<String> candidateKey, 
-    		List<String> nonkeyAttributes, Map<List<String>, List<String>> transitiveFD) {
-		//List<Set<String>> schemaList = new ArrayList<>();
-    	Map<List<String>, List<String>> schemaMap = new HashMap<>();
-		// get all functional dependency
-		Map<List<String>, List<String>> FD = new LinkedHashMap<>();
-		//Because of 2nf, candidate key -> nonKey attributes
-		FD.put(candidateKey, nonkeyAttributes);
-		FD.putAll(transitiveFD);
-		// get the minimal basis of FD
-		Map<List<String>, List<String>> miniCover = getMinimalBasis(candidateKey, FD);
-		// for each functional dependency, get the schema
-		boolean flag = false;
-		
-		//************Assume candidate key is a superkey****************//
-		Set<String> ckSet = new HashSet<String>(candidateKey);
-		
-		List<Set<String>> currentSetList = new ArrayList<>();
-		
-		for(Entry<List<String>, List<String>> entry: miniCover.entrySet()){
-			Set<String> set = new HashSet<String>(entry.getKey());
-			set.addAll(entry.getValue());
-			
-			if (currentSetList.size()==0) {
-				currentSetList.add(set);
-				schemaMap.put(entry.getKey(), entry.getValue());
-			}else {
-				boolean addFlag = true;
-				for (int i = 0; i < currentSetList.size(); i++) {
-					Set<String> currentSet = currentSetList.get(i);
-					if (currentSet.containsAll(set)) {
-						addFlag = false;
-					}
-				}
-				if (addFlag) {
-					currentSetList.add(set);
-					//System.out.println(schemaMap);
-					schemaMap.put(entry.getKey(), entry.getValue());
-					//System.out.println(schemaMap);
-				}
-			}
-			
-			
-			if (set.containsAll(ckSet)) {
-				flag = true;
-			}
-			//schemaList.add(set);
-		}
+//    public static Map<List<String>, List<String>> decomposeTo3NF(String tabName, List<String> candidateKey,
+//    		List<String> nonkeyAttributes, Map<List<String>, List<String>> transitiveFD) {
+//		//List<Set<String>> schemaList = new ArrayList<>();
+//    	Map<List<String>, List<String>> schemaMap = new HashMap<>();
+//		// get all functional dependency
+//		Map<List<String>, List<String>> FD = new LinkedHashMap<>();
+//		//Because of 2nf, candidate key -> nonKey attributes
+//		FD.put(candidateKey, nonkeyAttributes);
+//		FD.putAll(transitiveFD);
+//		// get the minimal basis of FD
+//		Map<List<String>, List<String>> miniCover = getMinimalBasis(candidateKey, FD);
+//		// for each functional dependency, get the schema
+//		boolean flag = false;
+//
+//		//************Assume candidate key is a superkey****************//
+//		Set<String> ckSet = new HashSet<String>(candidateKey);
+//
+//		List<Set<String>> currentSetList = new ArrayList<>();
+//
+//		for(Entry<List<String>, List<String>> entry: miniCover.entrySet()){
+//			Set<String> set = new HashSet<String>(entry.getKey());
+//			set.addAll(entry.getValue());
+//
+//			if (currentSetList.size()==0) {
+//				currentSetList.add(set);
+//				schemaMap.put(entry.getKey(), entry.getValue());
+//			}else {
+//				boolean addFlag = true;
+//				for (int i = 0; i < currentSetList.size(); i++) {
+//					Set<String> currentSet = currentSetList.get(i);
+//					if (currentSet.containsAll(set)) {
+//						addFlag = false;
+//					}
+//				}
+//				if (addFlag) {
+//					currentSetList.add(set);
+//					//System.out.println(schemaMap);
+//					schemaMap.put(entry.getKey(), entry.getValue());
+//					//System.out.println(schemaMap);
+//				}
+//			}
+//
+//
+//			if (set.containsAll(ckSet)) {
+//				flag = true;
+//			}
+//			//schemaList.add(set);
+//		}
 		
 		//schemaMap = miniCover;
 		// if no R is a superkey, add schema R0 where R0 is a key of R
-		if (!flag) {
-			schemaMap.put(candidateKey, new ArrayList<>());
-		}
-		return schemaMap;
-	}
+//		if (!flag) {
+//			schemaMap.put(candidateKey, new ArrayList<>());
+//		}
+//		return schemaMap;
+//	}
     
     
-    public static Map<List<String>, List<String>> getMinimalBasis(List<String> candidateKeys, 
-    		Map<List<String>, List<String>> FD) {
-		Map<List<String>, List<String>> basisSchema = new LinkedHashMap<>();
-		
-		List<List<String>> left = new ArrayList<>();
-		List<String> right = new ArrayList<>();
-		
-		// split the right schema
-		for(Entry<List<String>, List<String>> entry: FD.entrySet()){
-			List<String> rightHandSchema = entry.getValue();
-			List<String> leftHandSchema = entry.getKey();
-			for(int i = 0; i < rightHandSchema.size(); i++){
-				left.add(leftHandSchema);
-				right.add(rightHandSchema.get(i));
-			}
-		}
-		
-		// eliminate redundant attributes from LHS
-		List<List<String>> leftnew = new ArrayList<>();
-		List<String> rightnew = right;
-		
-		for (int i = 0; i < left.size(); i++) {
-			List<String> lhs = left.get(i);
-			if (lhs.size()>1) {
-				List<Set<String>> closureList = new ArrayList<>();
-				// get the closure for every subset XB -> A
-				String tmpValue = right.get(i);
-				
-				for (int j = 0; j < lhs.size(); j++) {
-					List<String> temp = lhs;
-					temp.remove(j);
-					//System.out.println(temp);
-					Set<String> tempClosure = getClosure(temp, FD);
-					//System.out.println("Closure: " + tempClosure.toArray());
-					closureList.add(tempClosure);
-				}
-				
-				for (int j = 0; j < closureList.size(); j++){
-					if (closureList.get(j).contains(tmpValue)) {
-						lhs.remove(j);
-					}
-				}
-				leftnew.add(lhs);
-			}else{
-				//add to the left new
-				leftnew.add(lhs);
-			}
-		}
-		// delete redundant FDs from T
-		List<List<String>> basicLHS = new ArrayList<>();
-		List<String> basicRHS = new ArrayList<>();
-		
-		for (int i = 0; i < leftnew.size(); i++) {
-			// shape new FD
-			List<List<String>> tempLeft = new ArrayList<>(leftnew);
-			List<String> tempRight = new ArrayList<>(rightnew);
-			
-			tempLeft.remove(i);
-			tempRight.remove(i);
-			
-			String tempValue = rightnew.get(i);
-			List<String> tempCK = leftnew.get(i);
-			
-			Map<List<String>, List<String>> newFD = buildMapfrom2List(tempLeft, tempRight);
-			
-			//get closure
-			Set<String> closure = getClosure(tempCK, newFD);
-			if (!closure.contains(tempValue)) {
-				basicLHS.add(tempCK);
-				basicRHS.add(tempValue);
-			}else {
-				leftnew.remove(i);
-				rightnew.remove(i);
-				i--;
-			}
-		}
-		
-		basisSchema = buildMapfrom2List(basicLHS, basicRHS);
-		return basisSchema;
-	}
-    
-    public static Map<List<String>, List<String>> buildMapfrom2List(List<List<String>> list1, List<String> list2) {
-    	Map<List<String>, List<String>> newFD = new HashMap<>();
-    	for (int i = 0; i < list1.size(); i++) {
-    		if (newFD.containsKey(list1.get(i))){
-                List<String> value = newFD.get(list1.get(i));
-                value.add(list2.get(i));
-                //mapFDs.replace(subsetCK, nonKeys);
-                newFD.replace(list1.get(i), value);
-            }
-            else {
-                newFD.put(list1.get(i), Arrays.asList(list2.get(i)));
-            }
-		}
-    	return newFD;
-	}
+//    public static Map<List<String>, List<String>> getMinimalBasis(List<String> candidateKeys,
+//    		Map<List<String>, List<String>> FD) {
+//		Map<List<String>, List<String>> basisSchema = new LinkedHashMap<>();
+//
+//		List<List<String>> left = new ArrayList<>();
+//		List<String> right = new ArrayList<>();
+//
+//		// split the right schema
+//		for(Entry<List<String>, List<String>> entry: FD.entrySet()){
+//			List<String> rightHandSchema = entry.getValue();
+//			List<String> leftHandSchema = entry.getKey();
+//			for(int i = 0; i < rightHandSchema.size(); i++){
+//				left.add(leftHandSchema);
+//				right.add(rightHandSchema.get(i));
+//			}
+//		}
+//
+//		// eliminate redundant attributes from LHS
+//		List<List<String>> leftnew = new ArrayList<>();
+//		List<String> rightnew = right;
+//
+//		for (int i = 0; i < left.size(); i++) {
+//			List<String> lhs = left.get(i);
+//			if (lhs.size()>1) {
+//				List<Set<String>> closureList = new ArrayList<>();
+//				// get the closure for every subset XB -> A
+//				String tmpValue = right.get(i);
+//
+//				for (int j = 0; j < lhs.size(); j++) {
+//					List<String> temp = lhs;
+//					temp.remove(j);
+//					//System.out.println(temp);
+//					Set<String> tempClosure = getClosure(temp, FD);
+//					//System.out.println("Closure: " + tempClosure.toArray());
+//					closureList.add(tempClosure);
+//				}
+//
+//				for (int j = 0; j < closureList.size(); j++){
+//					if (closureList.get(j).contains(tmpValue)) {
+//						lhs.remove(j);
+//					}
+//				}
+//				leftnew.add(lhs);
+//			}else{
+//				//add to the left new
+//				leftnew.add(lhs);
+//			}
+//		}
+//		// delete redundant FDs from T
+//		List<List<String>> basicLHS = new ArrayList<>();
+//		List<String> basicRHS = new ArrayList<>();
+//
+//		for (int i = 0; i < leftnew.size(); i++) {
+//			// shape new FD
+//			List<List<String>> tempLeft = new ArrayList<>(leftnew);
+//			List<String> tempRight = new ArrayList<>(rightnew);
+//
+//			tempLeft.remove(i);
+//			tempRight.remove(i);
+//
+//			String tempValue = rightnew.get(i);
+//			List<String> tempCK = leftnew.get(i);
+//
+//			Map<List<String>, List<String>> newFD = buildMapfrom2List(tempLeft, tempRight);
+//
+//			//get closure
+//			Set<String> closure = getClosure(tempCK, newFD);
+//			if (!closure.contains(tempValue)) {
+//				basicLHS.add(tempCK);
+//				basicRHS.add(tempValue);
+//			}else {
+//				leftnew.remove(i);
+//				rightnew.remove(i);
+//				i--;
+//			}
+//		}
+//
+//		basisSchema = buildMapfrom2List(basicLHS, basicRHS);
+//		return basisSchema;
+//	}
+//
+//    public static Map<List<String>, List<String>> buildMapfrom2List(List<List<String>> list1, List<String> list2) {
+//    	Map<List<String>, List<String>> newFD = new HashMap<>();
+//    	for (int i = 0; i < list1.size(); i++) {
+//    		if (newFD.containsKey(list1.get(i))){
+//                List<String> value = newFD.get(list1.get(i));
+//                value.add(list2.get(i));
+//                //mapFDs.replace(subsetCK, nonKeys);
+//                newFD.replace(list1.get(i), value);
+//            }
+//            else {
+//                newFD.put(list1.get(i), Arrays.asList(list2.get(i)));
+//            }
+//		}
+//    	return newFD;
+//	}
     
     public static void main(String[] args) throws IOException{
 
@@ -746,6 +746,7 @@ public class CertifyNF {
                                 else {
                                     transitiveFD = check3NF(tableName, nonKey);
                                     if (!transitiveFD.isEmpty()) {
+                                        flag3NF = true;
                                     	explanation = "not in 3NF, ";
                                         System.out.println("Table " + tableName + " not in 3NF\n");
                                         for (Map.Entry<List<String>, List<String>> entry : transitiveFD.entrySet()) {
@@ -764,7 +765,7 @@ public class CertifyNF {
                                             explanation +="; ";
                                         }
                                         
-                                        relations = decomposeTo3NF(tableName, candidateKey, nonKey, transitiveFD);
+                                        relations = decomposeTo2NF(tableName, candidateKey, nonKey, transitiveFD);
                                         Boolean flag = decompositionVerify(relations);
                                         decompositionList.add(relations);
                                         decomposedTableNameList.add(tableName);
