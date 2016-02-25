@@ -261,7 +261,7 @@ public class CertifyNF {
 	}
     
     // Decomposition
-    public static Map<List<String>, List<String>> decompose(String tabName, List<String> candidateKey, List<String> nonKeyAttribute, 
+    public static Map<List<String>, List<String>> decomposeTo2NF(String tabName, List<String> candidateKey, List<String> nonKeyAttribute, 
     		Map<List<String>, List<String>> partialFD) throws SQLException {
 		// Identify each partial FD: Already done in previous step
     	// initialization
@@ -385,14 +385,14 @@ public class CertifyNF {
 	}*/
     
     // get the difference between set1 and set2
-    /*
+    
     public static Set<String> setDifference(Set<String> set1, Set<String> set2) {
 		set1.removeAll(set2);
 		return set1;
 	}
     
     // get the closure of a set of attributes
-    public static Set<String> getClosure(List<String> attribute, Map<List<String>, List<String>> splitedPartialFD) {
+    public static Set<String> getClosure(List<String> attribute, Map<List<String>, List<String>> FD) {
 		//initialization
     	Set<String> closure = new HashSet<String>(attribute);
     	
@@ -403,7 +403,7 @@ public class CertifyNF {
 			List<ArrayList<String>> subsetList = getSubset(closure);
 			// add new element into the set
 			for (ArrayList<String> subset: subsetList) {
-				List<String> element = splitedPartialFD.get(subset);
+				List<String> element = FD.get(subset);
 				if (element != null) {
 					closure.addAll(element);
 					System.out.println(closure);
@@ -437,7 +437,7 @@ public class CertifyNF {
 		System.out.println(subsets);
 		return subsets;
 	}
-    */
+    
     
     // verify the decomposition
     public static boolean decompositionVerify(Map<List<String>, List<String>> relations) {
@@ -494,10 +494,137 @@ public class CertifyNF {
 			}
     		
     		stringBuilder.deleteCharAt(stringBuilder.length()-1);
-    		Output.writeResult("Verfication:\n");
-    		Output.writeResult(" "+decomposedTableNameList.get(iter) + " = join(" + stringBuilder.toString()+")? " + verifyFlag);
+    		Output.writeResult("Verification:\n");
+    		Output.writeResult(" "+decomposedTableNameList.get(iter) + " = join(" + stringBuilder.toString()+")? " + verifyFlag + "\n");
     		
         }
+	}
+    
+    // decompose the table into 3NF.
+    public static Map<List<String>, List<String>> decomposeTo3NF(String tabName, List<String> candidateKey, 
+    		List<String> nonkeyAttributes, Map<List<String>, List<String>> transitiveFD) {
+		//List<Set<String>> schemaList = new ArrayList<>();
+    	Map<List<String>, List<String>> schemaMap = new HashMap<>();
+		// get all functional dependency
+		Map<List<String>, List<String>> FD = new LinkedHashMap<>();
+		//Because of 2nf, candidate key -> nonKey attributes
+		FD.put(candidateKey, nonkeyAttributes);
+		FD.putAll(transitiveFD);
+		// get the minimal basis of FD
+		Map<List<String>, List<String>> miniCover = getMinimalBasis(candidateKey, FD);
+		// for each functional dependency, get the schema
+		boolean flag = false;
+		Set<String> ckSet = new HashSet<String>(candidateKey);
+		
+		for(Entry<List<String>, List<String>> entry: miniCover.entrySet()){
+			Set<String> set = new HashSet<String>(entry.getKey());
+			//************Assume candidate key is a superkey****************//
+			if (set.equals(ckSet)) {
+				flag = true;
+			}
+			set.addAll(entry.getValue());
+			//schemaList.add(set);
+		}
+		schemaMap = miniCover;
+		// if no R is a superkey, add schema R0 where R0 is a key of R
+		if (!flag) {
+			schemaMap.put(candidateKey, new ArrayList<>());
+		}
+		return schemaMap;
+	}
+    
+    
+    public static Map<List<String>, List<String>> getMinimalBasis(List<String> candidateKeys, 
+    		Map<List<String>, List<String>> FD) {
+		Map<List<String>, List<String>> basisSchema = new LinkedHashMap<>();
+		
+		List<List<String>> left = new ArrayList<>();
+		List<String> right = new ArrayList<>();
+		
+		// split the right schema
+		for(Entry<List<String>, List<String>> entry: FD.entrySet()){
+			List<String> rightHandSchema = entry.getValue();
+			List<String> leftHandSchema = entry.getKey();
+			for(int i = 0; i < rightHandSchema.size(); i++){
+				left.add(leftHandSchema);
+				right.add(rightHandSchema.get(i));
+			}
+		}
+		
+		// eliminate redundant attributes from LHS
+		List<List<String>> leftnew = new ArrayList<>();
+		List<String> rightnew = right;
+		
+		for (int i = 0; i < left.size(); i++) {
+			List<String> lhs = left.get(i);
+			if (lhs.size()>1) {
+				List<Set<String>> closureList = new ArrayList<>();
+				// get the closure for every subset XB -> A
+				String tmpValue = right.get(i);
+				
+				for (int j = 0; j < lhs.size(); j++) {
+					List<String> temp = lhs;
+					temp.remove(j);
+					System.out.println(temp);
+					Set<String> tempClosure = getClosure(temp, FD);
+					System.out.println("Closure: " + tempClosure.toArray());
+					//closureList.add(tempClosure);
+				}
+				
+				for (int j = 0; j < closureList.size(); j++){
+					if (closureList.get(j).contains(tmpValue)) {
+						lhs.remove(j);
+					}
+				}
+				leftnew.add(lhs);
+			}else{
+				//add to the left new
+				leftnew.add(lhs);
+			}
+		}
+		// delete redundant FDs from T
+		List<List<String>> basicLHS = new ArrayList<>();
+		List<String> basicRHS = new ArrayList<>();
+		
+		for (int i = 0; i < leftnew.size(); i++) {
+			// shape new FD
+			List<List<String>> tempLeft = leftnew;
+			List<String> tempRight = rightnew;
+			
+			tempLeft.remove(i);
+			tempRight.remove(i);
+			
+			String tempValue = rightnew.get(i);
+			List<String> tempCK = leftnew.get(i);
+			
+			Map<List<String>, List<String>> newFD = buildMapfrom2List(tempLeft, tempRight);
+			
+			//get closure
+			Set<String> closure = getClosure(tempCK, newFD);
+			if (!closure.contains(tempValue)) {
+				basicLHS.add(tempCK);
+				basicRHS.add(tempValue);
+			}
+		}
+		
+		basisSchema = buildMapfrom2List(basicLHS, basicRHS);
+		return basisSchema;
+	}
+    
+    public static Map<List<String>, List<String>> buildMapfrom2List(List<List<String>> list1, List<String> list2) {
+    	Map<List<String>, List<String>> newFD = new HashMap<>();
+    	for (int i = 0; i < list1.size(); i++) {
+    		if (newFD.containsKey(list1.get(i))){
+                List<String> value = newFD.get(list1.get(i));
+                value.add(list2.get(i));
+                //mapFDs.replace(subsetCK, nonKeys);
+                newFD.replace(list1.get(i), value);
+            }
+            else {
+                newFD.put(list1.get(i), Arrays.asList(list2.get(i)));
+            }
+		}
+    	return newFD;
 	}
     
     public static void main(String[] args) throws IOException{
@@ -579,7 +706,7 @@ public class CertifyNF {
                                         explanation += "; ";
                                     }
                                     // decompose the table
-                                    relations = decompose(tableName, candidateKey, nonKey, partialFD);
+                                    relations = decomposeTo2NF(tableName, candidateKey, nonKey, partialFD);
                                     Boolean flag = decompositionVerify(relations);
                                     decompositionList.add(relations);
                                     decomposedTableNameList.add(tableName);
@@ -605,6 +732,12 @@ public class CertifyNF {
                                             System.out.println();
                                             explanation +="; ";
                                         }
+                                        
+                                        relations = decomposeTo3NF(tableName, candidateKey, nonKey, transitiveFD);
+                                        Boolean flag = decompositionVerify(relations);
+                                        decompositionList.add(relations);
+                                        decomposedTableNameList.add(tableName);
+                                        decompositionVerification.add(flag);
                                     }
                                     else {
                                     	flag3NF = true;

@@ -1,3 +1,4 @@
+R(K1(k),K2(k),A,B)
 R1(N(k),A(k),B(k),C)
 R2(N(k),M,C)
 R3(N(k),M,C)
