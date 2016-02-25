@@ -1,5 +1,6 @@
 package nf;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
@@ -7,6 +8,10 @@ import java.util.Map;
 
 public class GenerateSQL {
 
+	public static void createFile() throws IOException{
+		FileWriter writer = new FileWriter("NF.sql");
+		writer.close();
+	}
     public static void writeToFile(String sqlQuery) {
         try {
             Files.write(Paths.get("NF.sql"), sqlQuery.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
@@ -21,7 +26,7 @@ public class GenerateSQL {
         StringBuilder sqlQuery = new StringBuilder();
         sqlQuery.append("SELECT COUNT(*) \n" +
                 "\tFROM " + tableName + "\n" +
-                "WHERE ");
+                "\t\tWHERE ");
 
         for (int i = 0; i < candidateKey.size(); i++) {
             sqlQuery.append(candidateKey.get(i) + " IS NULL");
