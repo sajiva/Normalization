@@ -746,7 +746,7 @@ public class CertifyNF {
                                 else {
                                     transitiveFD = check3NF(tableName, nonKey);
                                     if (!transitiveFD.isEmpty()) {
-                                        flag3NF = true;
+                                        //flag3NF = true;
                                     	explanation = "not in 3NF, ";
                                         System.out.println("Table " + tableName + " not in 3NF\n");
                                         for (Map.Entry<List<String>, List<String>> entry : transitiveFD.entrySet()) {

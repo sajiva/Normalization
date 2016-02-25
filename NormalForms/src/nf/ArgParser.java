@@ -34,7 +34,7 @@ public class ArgParser {
 	}
 	
 	// read file
-	@SuppressWarnings("resource")
+	//@SuppressWarnings("resource")
 	public static boolean readFile() {
 		try {
 			FileReader fileReader = new FileReader(txtname);
@@ -47,8 +47,9 @@ public class ArgParser {
 				System.out.println("reading the " + idx + " line");
 				// parse the line
 				Vector<Integer> ps_leftparenthesis = indexesOf(line, '(');
+				Vector<Integer> ps_rightparenthesis = indexesOf(line, ')');
 				Vector<Integer> ps_comma = indexesOf(line, ',');
-				
+				/*
 				if (ps_leftparenthesis.isEmpty()) {
 					System.err.println("The line in file is wrong, pls check!");
 					return false;
@@ -56,17 +57,24 @@ public class ArgParser {
 				
 				if (ps_comma.isEmpty()) {
 					System.out.println("There is no none-key attributes");
-				}
+				}*/
 				//get table name
 				String tabname = line.substring(0, ps_leftparenthesis.get(0));
 				System.out.println(tabname);
 				tableNames.add(tabname);
 				
+				//get the substring
+				String sublineStr = line.substring(ps_leftparenthesis.get(0)+1, ps_rightparenthesis.get(ps_rightparenthesis.size()-1));
+				
+				sublineStr = ',' + sublineStr + ',';
+				System.out.println(sublineStr);
+				ps_comma = indexesOf(sublineStr, ',');
+				Vector<Integer> ps_k = indexesOf(sublineStr, 'k');
 				//get candidate key
-				ArrayList<String> ck = getCandidateKeyfromLine(line, ps_leftparenthesis);
+				ArrayList<String> ck = getCandidateKeyfromLine(sublineStr, ps_comma, ps_k);
 				
 				//get non-attribute key
-				ArrayList<String> nk = getNoneKeyAttributes(line, ps_leftparenthesis, ps_comma);
+				ArrayList<String> nk = getNoneKeyAttributes(sublineStr, ps_comma);
 				
 				// add candidate key and non-attribute key to lists
 				candidateKeys.add(ck);
@@ -87,9 +95,9 @@ public class ArgParser {
 	}
 	
 	//get non-attribute key
-	private static ArrayList<String> getNoneKeyAttributes(String line, Vector<Integer> ps_leftparenthesis,
-			Vector<Integer> ps_comma) {
+	private static ArrayList<String> getNoneKeyAttributes(String line, Vector<Integer> ps_comma) {
 		ArrayList<String> nk = new ArrayList<String>();
+		/*
 		// find commas position that bigger than left-parenthesis
 		int lastps_leftparenthesis = ps_leftparenthesis.lastElement();
 		for (int i = 0; i < ps_comma.size(); i++) {
@@ -104,6 +112,21 @@ public class ArgParser {
 					String nkname = line.substring(psc + 1, ps_comma.get(i+1));
 					nk.add(nkname);
 				}
+			}
+		}*/
+		for (int i = 1; i < ps_comma.size(); i++) {
+			String subStr = line.substring(ps_comma.get(i)-1, ps_comma.get(i));
+			if (!subStr.equals(")")) {
+				int max_comma = 0;
+				for (int j = 0; j < ps_comma.size(); j++) {
+					if (ps_comma.get(j) < ps_comma.get(i)) {
+						if (ps_comma.get(j)>max_comma) {
+							max_comma = ps_comma.get(j);
+						}
+					}
+				}
+				String ckString = line.substring(max_comma + 1, ps_comma.get(i));
+				nk.add(ckString);
 			}
 		}
 		System.out.println("Non-key Attributes: " + nk);
@@ -127,9 +150,10 @@ public class ArgParser {
 	}
 	
 	//get candidate key
-	private static ArrayList<String> getCandidateKeyfromLine(String line, Vector<Integer> ps_leftparenthesis) {
+	private static ArrayList<String> getCandidateKeyfromLine(String line, 
+			Vector<Integer> ps_comma, Vector<Integer> ps_k) {
 		ArrayList<String> ck = new ArrayList<String>();
-		for (int i = 1; i < ps_leftparenthesis.size(); i++) {
+		/*for (int i = 1; i < ps_leftparenthesis.size(); i++) {
 			// double check
 			String ckflag = line.substring(ps_leftparenthesis.get(i), ps_leftparenthesis.get(i)+3);
 			if (ckflag.equals("(k)")) {
@@ -145,6 +169,28 @@ public class ArgParser {
 				return null;
 			}
 			
+		}*/
+		int strLen = line.length();
+		for (int i = 0; i < ps_k.size(); i++) {
+			if (ps_k.get(i)<1 || ps_k.get(i) > strLen-2) {
+				System.err.println("Wrong in reading candidate keys");
+			}else{
+				String subStr = line.substring(ps_k.get(i) - 1, ps_k.get(i) + 2);
+				//System.out.println(subStr);
+				if (subStr.equals("(k)")) {
+					// search the closest comma position
+					int max_comma = 0;
+					for (int j = 0; j < ps_comma.size(); j++) {
+						if (ps_comma.get(j) < ps_k.get(i)) {
+							if (ps_comma.get(j)>max_comma) {
+								max_comma = ps_comma.get(j);
+							}
+						}
+					}
+					String ckString = line.substring(max_comma + 1, ps_k.get(i)-1);
+					ck.add(ckString);
+				}
+			}
 		}
 		System.out.println("Candidate key: " + ck);
 		return ck;
