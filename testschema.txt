@@ -1,3 +1,7 @@
 R1(N(k),A(k),B(k),C)
 R2(N(k),M,C)
 R3(N(k),M,C)
+R(K1(k),K2(k),A,B)
+R10(A(k),B(k),C,D)
+R2(A,B,Z,W(k))
+R11(A(k),B(k),C,F)

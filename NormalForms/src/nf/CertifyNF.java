@@ -280,6 +280,18 @@ public class CertifyNF {
     	if (checkclosure(allattributesSet, candidateKey, splitedPartialFD)) {
 			splitRelation(tabName, candidateKey, nonKeyAttribute, partialFD);
 		}*/
+        int n = 1;
+        // Create temp tables in database for each decomposed table
+        for (Map.Entry<List<String>,List<String>> entry : relations.entrySet()) {
+
+            List<String> allAttributes = new ArrayList<>();
+            allAttributes.addAll(entry.getKey());
+            allAttributes.addAll(entry.getValue());
+
+            String sqlQuery = GenerateSQL.createTempTable(tabName, tabName + "_" + n++, allAttributes);
+            System.out.println(sqlQuery);
+            DbConnection.execute(sqlQuery);
+        }
     	return relations;
 	}
     
