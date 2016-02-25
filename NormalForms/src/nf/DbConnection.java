@@ -45,6 +45,17 @@ public class DbConnection {
         }
     }
 
+    public static void execute(String sqlStatement) {
+        Statement st = null;
+        try {
+            st = conn.createStatement();
+            st.execute(sqlStatement);
+        } catch (SQLException e) {
+            System.err.println("Could not create statement");
+            e.printStackTrace();
+        }
+    }
+
     public static void closeConnection() {
         try {
             conn.close();
