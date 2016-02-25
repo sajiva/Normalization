@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class CertifyNF {
 
@@ -293,18 +294,21 @@ public class CertifyNF {
     	//allSet.addAll(ckSet);
     	//allSet.addAll(nckSet);
 		// choose one functional dependency.
+
+        List<String> ck1 = candidateKey;
+        List<String> nck1 = nonKeyAttribute;
     	
     	//// get the first key in the hash map
-    	List<String> ck1 = partialFD.keySet().iterator().next();
+    	List<String> ck2 = partialFD.keySet().iterator().next();
     	// do not need to get closure
     	//Set<String> R1 = getClosure(ck1, partialFD);
     	//// get the value from the hash map
-    	List<String> nck1 = partialFD.get(ck1);
+    	List<String> nck2 = partialFD.get(ck2);
     	/// get the new partial functional dependency
     	
-    	List<String> ck2 = candidateKey;
-    	List<String> nck2 = nonKeyAttribute;
-    	nck2.removeAll(nck1);
+//    	List<String> ck2 = candidateKey;
+//    	List<String> nck2 = nonKeyAttribute;
+    	nck1.removeAll(nck2);
     	
     	Map<List<String>, List<String>> pFD1 = check2NF(tabName, ck1, nck1);
     	
@@ -440,15 +444,64 @@ public class CertifyNF {
 //		return subsets;
 //	}
 //
-    
+
     // verify the decomposition
-    public static boolean decompositionVerify(Map<List<String>, List<String>> relations) {
-    	for(Entry<List<String>, List<String>> entry: relations.entrySet()){
-    		List<String> ck = entry.getKey();
-    		List<String> nk = entry.getValue();
-    	}
-		return true;
-	}
+    public static boolean decompositionVerify(Map<List<String>, List<String>> relations, String tableName) throws SQLException {
+
+        int n = 1;
+        List<String> decomposedTables = new ArrayList<>();
+        List<String> mainTable = new ArrayList<>();
+        boolean first = true;
+
+        // Create temp tables in database for each decomposed table
+        for (Map.Entry<List<String>,List<String>> entry : relations.entrySet()) {
+
+            List<String> allAttributes = new ArrayList<>();
+            allAttributes.addAll(entry.getKey());
+            allAttributes.addAll(entry.getValue());
+
+            if (first) {
+                mainTable.addAll(allAttributes);
+                first = false;
+            }
+
+            String tabName = tableName + "_" + n++;
+            decomposedTables.add(tabName);
+            String sqlQuery = GenerateSQL.createTempTable(tableName, tabName, allAttributes);
+            //System.out.println(sqlQuery);
+            DbConnection.execute(sqlQuery);
+        }
+
+        // Get the keys for the decomposed tables
+        List<List<String>> foreignKeys = new ArrayList<>();
+        List<List<String>> allKeys = new ArrayList<>();
+        allKeys.addAll(relations.keySet());
+
+        for (int i = 1; i < allKeys.size(); i++) {
+            List<String> list1 = mainTable;
+            List<String> list2 = allKeys.get(i);
+            List<String> list3 = list1.stream().filter(list2::contains).collect(Collectors.toList());
+            foreignKeys.add(list3);
+        }
+
+        // Join the decomposed tables and verify the cout with the original table
+        String sqlQuery = GenerateSQL.getCountJoinTables(decomposedTables, foreignKeys);
+        //System.out.println(sqlQuery);
+        ResultSet rs = DbConnection.executeQuery(sqlQuery);
+        int count1 = 0;
+        if (rs.next()) {
+            count1 = rs.getInt(1);
+        }
+
+        sqlQuery = GenerateSQL.getTotalCount(tableName);
+        rs = DbConnection.executeQuery(sqlQuery);
+        int count2 = 0;
+        if (rs.next()) {
+            count2 = rs.getInt(1);
+        }
+
+        return count1 == count2;
+    }
     
     // print decomposition
     public static void printDecomposition(List<Map<List<String>, List<String>>> decompositionList, 
@@ -739,7 +792,7 @@ public class CertifyNF {
                                     }
                                     // decompose the table
                                     relations = decomposeTo2NF(tableName, candidateKey, nonKey, partialFD);
-                                    Boolean flag = decompositionVerify(relations);
+                                    Boolean flag = decompositionVerify(relations, tableName);
                                     decompositionList.add(relations);
                                     decomposedTableNameList.add(tableName);
                                     decompositionVerification.add(flag);
@@ -767,7 +820,7 @@ public class CertifyNF {
                                         }
                                         
                                         relations = decomposeTo2NF(tableName, candidateKey, nonKey, transitiveFD);
-                                        Boolean flag = decompositionVerify(relations);
+                                        Boolean flag = decompositionVerify(relations, tableName);
                                         decompositionList.add(relations);
                                         decomposedTableNameList.add(tableName);
                                         decompositionVerification.add(flag);
