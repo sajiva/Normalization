@@ -280,18 +280,6 @@ public class CertifyNF {
     	if (checkclosure(allattributesSet, candidateKey, splitedPartialFD)) {
 			splitRelation(tabName, candidateKey, nonKeyAttribute, partialFD);
 		}*/
-        int n = 1;
-        // Create temp tables in database for each decomposed table
-        for (Map.Entry<List<String>,List<String>> entry : relations.entrySet()) {
-
-            List<String> allAttributes = new ArrayList<>();
-            allAttributes.addAll(entry.getKey());
-            allAttributes.addAll(entry.getValue());
-
-            String sqlQuery = GenerateSQL.createTempTable(tabName, tabName + "_" + n++, allAttributes);
-            System.out.println(sqlQuery);
-            DbConnection.execute(sqlQuery);
-        }
     	return relations;
 	}
     
@@ -305,22 +293,18 @@ public class CertifyNF {
     	//allSet.addAll(ckSet);
     	//allSet.addAll(nckSet);
 		// choose one functional dependency.
-
-        List<String> ck1 = candidateKey;
-        List<String> nck1 = nonKeyAttribute;
     	
     	//// get the first key in the hash map
-    	List<String> ck2 = partialFD.keySet().iterator().next();
+    	List<String> ck1 = partialFD.keySet().iterator().next();
     	// do not need to get closure
     	//Set<String> R1 = getClosure(ck1, partialFD);
     	//// get the value from the hash map
-    	List<String> nck2 = partialFD.get(ck2);
+    	List<String> nck1 = partialFD.get(ck1);
     	/// get the new partial functional dependency
     	
-//    	List<String> ck2 = candidateKey;
-//    	List<String> nck2 = nonKeyAttribute;
-//    	nck2.removeAll(nck1);
-        nck1.removeAll(nck2);
+    	List<String> ck2 = candidateKey;
+    	List<String> nck2 = nonKeyAttribute;
+    	nck2.removeAll(nck1);
     	
     	Map<List<String>, List<String>> pFD1 = check2NF(tabName, ck1, nck1);
     	
@@ -414,7 +398,7 @@ public class CertifyNF {
     	
     	boolean flag = true;
 		while (flag) {
-			Set<String> tempClosure = closure;
+			Set<String> tempClosure = new HashSet<String>(closure);
 			// get all candidate of closure
 			List<ArrayList<String>> subsetList = getSubset(closure);
 			// add new element into the set
@@ -422,10 +406,12 @@ public class CertifyNF {
 				List<String> element = FD.get(subset);
 				if (element != null) {
 					closure.addAll(element);
-					System.out.println(closure);
+					//System.out.println(closure);
 				}	
 			}
-			if (tempClosure.equals(closure)) {
+			System.out.println(closure);
+			System.out.println(tempClosure);
+			if (tempClosure.containsAll(closure) && closure.containsAll(tempClosure)) {
 				flag = false;
 			}
 		}
@@ -450,7 +436,7 @@ public class CertifyNF {
 		}
 		
 		subsets.remove(0);
-		System.out.println(subsets);
+		//System.out.println(subsets);
 		return subsets;
 	}
     
@@ -604,8 +590,8 @@ public class CertifyNF {
 		
 		for (int i = 0; i < leftnew.size(); i++) {
 			// shape new FD
-			List<List<String>> tempLeft = leftnew;
-			List<String> tempRight = rightnew;
+			List<List<String>> tempLeft = new ArrayList<>(leftnew);
+			List<String> tempRight = new ArrayList<>(rightnew);
 			
 			tempLeft.remove(i);
 			tempRight.remove(i);
@@ -620,6 +606,10 @@ public class CertifyNF {
 			if (!closure.contains(tempValue)) {
 				basicLHS.add(tempCK);
 				basicRHS.add(tempValue);
+			}else {
+				leftnew.remove(i);
+				rightnew.remove(i);
+				i--;
 			}
 		}
 		
