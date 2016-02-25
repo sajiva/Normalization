@@ -2,6 +2,7 @@ package nf;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
@@ -61,10 +62,13 @@ public class GenerateSQLTest {
     @Test
     public void testBuildQueryGetCountJoinTables() {
         String query = "SELECT COUNT(*)\n" +
-                "\tFROM R11\n" +
-                "JOIN R12\n" +
-                "\tON R11.B = R12.B;\n";
-        assertEquals(GenerateSQL.getCountJoinTables("R11", "R12", "B"), query);
+                "FROM R_1\n" +
+                "JOIN R_2\n" +
+                "\tON R_1.A = R_2.A\n" +
+                "JOIN R_3\n" +
+                "\tON R_1.B = R_3.B\n" +
+                "\tAND R_1.C = R_3.C\n";
+        assertEquals(GenerateSQL.getCountJoinTables(Arrays.asList("R_1", "R_2", "R_3"), Arrays.asList(Arrays.asList("A"), Arrays.asList("B", "C"))), query);
     }
 
 }
