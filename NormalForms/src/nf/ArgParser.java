@@ -60,14 +60,14 @@ public class ArgParser {
 				}*/
 				//get table name
 				String tabname = line.substring(0, ps_leftparenthesis.get(0));
-				System.out.println(tabname);
+				System.out.println("Table name: " + tabname);
 				tableNames.add(tabname);
 				
 				//get the substring
 				String sublineStr = line.substring(ps_leftparenthesis.get(0)+1, ps_rightparenthesis.get(ps_rightparenthesis.size()-1));
 				
 				sublineStr = ',' + sublineStr + ',';
-				System.out.println(sublineStr);
+				//System.out.println(sublineStr);
 				ps_comma = indexesOf(sublineStr, ',');
 				Vector<Integer> ps_k = indexesOf(sublineStr, 'k');
 				//get candidate key
@@ -129,7 +129,7 @@ public class ArgParser {
 				nk.add(ckString);
 			}
 		}
-		System.out.println("Non-key Attributes: " + nk);
+		System.out.println("Non-key Attributes: " + nk + "\n");
 		return nk;
 	}
 
