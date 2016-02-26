@@ -377,7 +377,8 @@ public class CertifyNF {
     public static void printDecomposition(List<Map<List<String>, List<String>>> decompositionList, 
     		List<String> decomposedTableNameList, List<Boolean> decompositionVerification) throws IOException {
     	
-    	for(int iter = 0; iter <decomposedTableNameList.size(); iter++){
+    	for (int iter = 0; iter <decomposedTableNameList.size(); iter++) {
+
         	Output.writeResult("\n" + decomposedTableNameList.get(iter) + " decomposition:\n");
         	Map<List<String>, List<String>> relation = decompositionList.get(iter);
         	int j = 0;
@@ -385,9 +386,9 @@ public class CertifyNF {
     		for(Entry<List<String>, List<String>> entry : relation.entrySet()) {  
                 //System.out.println(entry.getKey()+"："+entry.getValue());
     			j++;
-    			Output.writeResult(" "+decomposedTableNameList.get(iter)+j+"(");
+    			Output.writeResult(" "+decomposedTableNameList.get(iter) + "_" + j + "(");
     			
-    			stringBuilder.append(decomposedTableNameList.get(iter)+ j + ",");
+    			stringBuilder.append(decomposedTableNameList.get(iter) + "_" + j + ",");
     			
     			List<String> ck = entry.getKey();
     			List<String> nk = entry.getValue();
