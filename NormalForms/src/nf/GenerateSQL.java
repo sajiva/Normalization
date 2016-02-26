@@ -29,9 +29,11 @@ public class GenerateSQL {
                 "WHERE ");
 
         for (int i = 0; i < candidateKey.size(); i++) {
-            sqlQuery.append(candidateKey.get(i) + " IS NULL\n");
+            sqlQuery.append(candidateKey.get(i) + " IS NULL");
             if (i < candidateKey.size() - 1)
-                sqlQuery.append("\tOR ");
+                sqlQuery.append("\n\tOR ");
+            else
+                sqlQuery.append(";\n");
         }
 
         writeToFile("\n -- Check nulls in candidate key \n");
@@ -140,18 +142,20 @@ public class GenerateSQL {
 
         StringBuilder sqlQuery = new StringBuilder();
         sqlQuery.append("SELECT COUNT(*)\n" +
-                "FROM " + tableNames.get(0) + "\n");
-                for (int i = 1; i < tableNames.size(); i++) {
-                    sqlQuery.append("JOIN " + tableNames.get(i) + "\n\tON ");
+                "FROM " + tableNames.get(0));
 
-                    List<String> fkeys = foreignKeys.get(i-1);
-                    for (int j = 0; j < fkeys.size(); j++) {
-                        sqlQuery.append(tableNames.get(0) + "." + fkeys.get(j) + " = " + tableNames.get(i) + "." + fkeys.get(j) + "\n");
-                        if (j < fkeys.size() - 1) {
-                            sqlQuery.append("\tAND ");
-                        }
-                    }
+        for (int i = 1; i < tableNames.size(); i++) {
+            sqlQuery.append("\nJOIN " + tableNames.get(i) + "\n\tON ");
+
+            List<String> fkeys = foreignKeys.get(i-1);
+            for (int j = 0; j < fkeys.size(); j++) {
+                sqlQuery.append(tableNames.get(0) + "." + fkeys.get(j) + " = " + tableNames.get(i) + "." + fkeys.get(j));
+                if (j < fkeys.size() - 1) {
+                    sqlQuery.append("\n\tAND ");
                 }
+            }
+        }
+        sqlQuery.append(";\n");
 
         writeToFile("\n -- Join two tables and get count \n");
         writeToFile(sqlQuery.toString());

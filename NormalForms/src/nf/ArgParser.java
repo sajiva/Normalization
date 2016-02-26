@@ -5,12 +5,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-
 public class ArgParser {
+
 	public static List<String> tableNames = new ArrayList<String>();
 	public static List<List<String>> candidateKeys = new ArrayList<List<String>>();
 	public static List<List<String>> nonKeyAttributes = new ArrayList<List<String>>();
-	
 	public static String txtname;
 	
 	// parse argument
@@ -25,8 +24,8 @@ public class ArgParser {
 			int beginInd = args[0].indexOf("=") + 1;
 			int endInd = args[0].length();
 			txtname = args[0].substring(beginInd, endInd);
-			System.out.println("database txt name is: "+ txtname);
-		}else{
+		}
+        else {
 			System.err.println("The command format is wrong! The syntax should be: CertifyNF database=dbnametxt");
 			return false;
 		}
@@ -39,25 +38,14 @@ public class ArgParser {
 		try {
 			FileReader fileReader = new FileReader(txtname);
 			BufferedReader bReader = new BufferedReader(fileReader);
-			
 			String line = bReader.readLine();
-			int idx = 0;
+
 			while (null != line) {
-				idx ++ ;
-				System.out.println("reading the " + idx + " line");
 				// parse the line
 				Vector<Integer> ps_leftparenthesis = indexesOf(line, '(');
 				Vector<Integer> ps_rightparenthesis = indexesOf(line, ')');
-				Vector<Integer> ps_comma = indexesOf(line, ',');
-				/*
-				if (ps_leftparenthesis.isEmpty()) {
-					System.err.println("The line in file is wrong, pls check!");
-					return false;
-				}
-				
-				if (ps_comma.isEmpty()) {
-					System.out.println("There is no none-key attributes");
-				}*/
+				Vector<Integer> ps_comma;
+
 				//get table name
 				String tabname = line.substring(0, ps_leftparenthesis.get(0));
 				System.out.println("Table name: " + tabname);
@@ -65,14 +53,11 @@ public class ArgParser {
 				
 				//get the substring
 				String sublineStr = line.substring(ps_leftparenthesis.get(0)+1, ps_rightparenthesis.get(ps_rightparenthesis.size()-1));
-				
 				sublineStr = ',' + sublineStr + ',';
-				//System.out.println(sublineStr);
 				ps_comma = indexesOf(sublineStr, ',');
 				Vector<Integer> ps_k = indexesOf(sublineStr, 'k');
 				//get candidate key
 				ArrayList<String> ck = getCandidateKeyfromLine(sublineStr, ps_comma, ps_k);
-				
 				//get non-attribute key
 				ArrayList<String> nk = getNoneKeyAttributes(sublineStr, ps_comma);
 				
@@ -85,7 +70,8 @@ public class ArgParser {
 			}
 			
 			bReader.close();
-		} catch (IOException e) {
+		}
+        catch (IOException e) {
 			System.err.println("Cannot read file, pls check path!");
 			e.printStackTrace();
 			return false;
@@ -96,24 +82,9 @@ public class ArgParser {
 	
 	//get non-attribute key
 	private static ArrayList<String> getNoneKeyAttributes(String line, Vector<Integer> ps_comma) {
-		ArrayList<String> nk = new ArrayList<String>();
-		/*
-		// find commas position that bigger than left-parenthesis
-		int lastps_leftparenthesis = ps_leftparenthesis.lastElement();
-		for (int i = 0; i < ps_comma.size(); i++) {
-			int psc = ps_comma.get(i);
-			if (psc > lastps_leftparenthesis) {
-				if (i == ps_comma.size() - 1) {
-					// last one
-					String nkname = line.substring(psc + 1, line.length()-1);
-					nk.add(nkname);
-				}else{
-					// not the last one
-					String nkname = line.substring(psc + 1, ps_comma.get(i+1));
-					nk.add(nkname);
-				}
-			}
-		}*/
+
+        ArrayList<String> nk = new ArrayList<String>();
+
 		for (int i = 1; i < ps_comma.size(); i++) {
 			String subStr = line.substring(ps_comma.get(i)-1, ps_comma.get(i));
 			if (!subStr.equals(")")) {
@@ -152,31 +123,17 @@ public class ArgParser {
 	//get candidate key
 	private static ArrayList<String> getCandidateKeyfromLine(String line, 
 			Vector<Integer> ps_comma, Vector<Integer> ps_k) {
-		ArrayList<String> ck = new ArrayList<String>();
-		/*for (int i = 1; i < ps_leftparenthesis.size(); i++) {
-			// double check
-			String ckflag = line.substring(ps_leftparenthesis.get(i), ps_leftparenthesis.get(i)+3);
-			if (ckflag.equals("(k)")) {
-				if (i==1) {
-					String ckname = line.substring(ps_leftparenthesis.get(0)+1, ps_leftparenthesis.get(i));
-					ck.add(ckname);
-				}else {
-					String ckname = line.substring(ps_leftparenthesis.get(i-1) + 4, ps_leftparenthesis.get(i));
-					ck.add(ckname);
-				}
-			}else{
-				System.err.println("There is a typo in schema!");
-				return null;
-			}
-			
-		}*/
+
+        ArrayList<String> ck = new ArrayList<String>();
+
 		int strLen = line.length();
 		for (int i = 0; i < ps_k.size(); i++) {
 			if (ps_k.get(i)<1 || ps_k.get(i) > strLen-2) {
-				System.err.println("Wrong in reading candidate keys");
-			}else{
+				System.err.println("Error in reading candidate keys");
+			}
+            else{
 				String subStr = line.substring(ps_k.get(i) - 1, ps_k.get(i) + 2);
-				//System.out.println(subStr);
+
 				if (subStr.equals("(k)")) {
 					// search the closest comma position
 					int max_comma = 0;
