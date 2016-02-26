@@ -3,7 +3,6 @@ package nf;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 public class CertifyNF {
@@ -44,30 +43,25 @@ public class CertifyNF {
 
     public static Map<List<String>, List<String>> check2NF(String tableName, List<String> candidateKey, List<String> nonKeyAttributes) throws SQLException {
 
-        //Map<List<String>, List<String>> mapFDs = new HashMap<>();
     	Map<List<String>, List<String>> mapFDs = new LinkedHashMap<>();
 
         if (candidateKey.size() > 1) {
             // check FD's against individual candidate key
             for (String cK : candidateKey) {
                 String sqlQuery = GenerateSQL.getDistinctCount(tableName, cK);
-                //System.out.println(sqlQuery);
                 ResultSet rs = DbConnection.executeQuery(sqlQuery);
                 int ckCount = 0;
 
                 if (rs.next()) {
-                    //System.out.println(rs.getInt(1));
                     ckCount = rs.getInt(1);
                 }
 
                 for (String nonKey : nonKeyAttributes) {
                     sqlQuery = GenerateSQL.getDistinctCount(tableName, Arrays.asList(cK, nonKey));
-                    //System.out.println(sqlQuery);
                     rs = DbConnection.executeQuery(sqlQuery);
                     int nkCount = 0;
 
                     if (rs.next()) {
-                        //System.out.println(rs.getInt(1));
                         nkCount = rs.getInt(1);
                     }
 
@@ -82,7 +76,6 @@ public class CertifyNF {
                             mapFDs.put(Arrays.asList(cK), Arrays.asList(nonKey));
                         }
                     }
-
                 }
             }
 
@@ -91,23 +84,19 @@ public class CertifyNF {
                 for (int i = 0; i < candidateKey.size(); i++) {
                     List<String> subsetCK = Arrays.asList(candidateKey.get(i), candidateKey.get((i+1) % 3));
                     String sqlQuery = GenerateSQL.getDistinctCount(tableName, subsetCK);
-                    //System.out.println(sqlQuery);
                     ResultSet rs = DbConnection.executeQuery(sqlQuery);
                     int ckCount = 0;
 
                     if (rs.next()) {
-                        //System.out.println(rs.getInt(1));
                         ckCount = rs.getInt(1);
                     }
 
                     for (String nonKey : nonKeyAttributes) {
                         sqlQuery = GenerateSQL.getDistinctCount(tableName, Arrays.asList(candidateKey.get(i), candidateKey.get((i+1) % 3), nonKey));
-                        //System.out.println(sqlQuery);
                         rs = DbConnection.executeQuery(sqlQuery);
                         int nkCount = 0;
 
                         if (rs.next()) {
-                            //System.out.println(rs.getInt(1));
                             nkCount = rs.getInt(1);
                         }
 
@@ -136,24 +125,20 @@ public class CertifyNF {
             // check FDs against individual non key attributes
             for (String nKey1 : nonKeyAttributes) {
                 String sqlQuery = GenerateSQL.getDistinctCount(tableName, nKey1);
-                //System.out.println(sqlQuery);
                 ResultSet rs = DbConnection.executeQuery(sqlQuery);
                 int count1 = 0;
 
                 if (rs.next()) {
-                    //System.out.println(rs.getInt(1));
                     count1 = rs.getInt(1);
                 }
 
                 for (String nKey2 : nonKeyAttributes) {
                     if (!nKey1.equals(nKey2)) {
                         sqlQuery = GenerateSQL.getDistinctCount(tableName, Arrays.asList(nKey1, nKey2));
-                        //System.out.println(sqlQuery);
                         rs = DbConnection.executeQuery(sqlQuery);
                         int count2 = 0;
 
                         if (rs.next()) {
-                            //System.out.println(rs.getInt(1));
                             count2 = rs.getInt(1);
                         }
 
@@ -177,24 +162,20 @@ public class CertifyNF {
                     for (int j = i+1; j < nonKeyAttributes.size(); j++) {
                         List<String> subsetNonKeys = Arrays.asList(nonKeyAttributes.get(i), nonKeyAttributes.get(j));
                         String sqlQuery = GenerateSQL.getDistinctCount(tableName, subsetNonKeys);
-                        //System.out.println(sqlQuery);
                         ResultSet rs = DbConnection.executeQuery(sqlQuery);
                         int count1 = 0;
 
                         if (rs.next()) {
-                            //System.out.println(rs.getInt(1));
                             count1 = rs.getInt(1);
                         }
 
                         for (String nKey : nonKeyAttributes) {
                             if (!nKey.equals(nonKeyAttributes.get(i)) && !nKey.equals(nonKeyAttributes.get(j))) {
                                 sqlQuery = GenerateSQL.getDistinctCount(tableName, Arrays.asList(nonKeyAttributes.get(i), nonKeyAttributes.get(j), nKey));
-                                //System.out.println(sqlQuery);
                                 rs = DbConnection.executeQuery(sqlQuery);
                                 int count2 = 0;
 
                                 if (rs.next()) {
-                                    //System.out.println(rs.getInt(1));
                                     count2 = rs.getInt(1);
                                 }
 
@@ -272,24 +253,14 @@ public class CertifyNF {
     	
     	//// get the first key in the hash map
     	List<String> ck2 = partialFD.keySet().iterator().next();
-    	// do not need to get closure
-    	//Set<String> R1 = getClosure(ck1, partialFD);
     	//// get the value from the hash map
     	List<String> nck2 = partialFD.get(ck2);
-    	/// get the new partial functional dependency
-    	
-//    	List<String> ck2 = candidateKey;
-//    	List<String> nck2 = nonKeyAttribute;
+
     	nck1.removeAll(nck2);
     	
     	Map<List<String>, List<String>> pFD1 = check2NF(tabName, ck1, nck1);
-    	
-    	//System.out.println(Arrays.toString(pFD1.entrySet().toArray()));
-    	
     	Map<List<String>, List<String>> pFD2 = check2NF(tabName, ck2, nck2);
-    	
-    	//System.out.println(Arrays.toString(pFD2.entrySet().toArray()));
-    	
+
     	Map<List<String>, List<String>> T = new LinkedHashMap<List<String>, List<String>>();
     	Map<List<String>, List<String>> T1 = new LinkedHashMap<List<String>, List<String>>();
     	Map<List<String>, List<String>> T2 = new LinkedHashMap<List<String>, List<String>>();
@@ -297,7 +268,8 @@ public class CertifyNF {
     	if (!pFD1.isEmpty()) {
 			T1 = splitRelation(tabName, ck1, nck1, pFD1);
 			T.putAll(T1);
-		}else {
+		}
+        else {
 			T1.put(ck1, nck1);
 			T.putAll(T1);
 		}
@@ -305,12 +277,11 @@ public class CertifyNF {
     	if (!pFD2.isEmpty()) {
     		T2 = splitRelation(tabName, ck2, nck2, pFD2);
     		T.putAll(T2);
-		}else{
+		}
+        else {
 			T2.put(ck2, nck2);
 			T.putAll(T2);
 		}
-    	//System.out.println("The map is: ");
-    	//System.out.println(Arrays.toString(T.entrySet().toArray()));
     	
     	return T; 
 	}
@@ -325,7 +296,6 @@ public class CertifyNF {
 
         // Create temp tables in database for each decomposed table
         for (Map.Entry<List<String>,List<String>> entry : relations.entrySet()) {
-
             List<String> allAttributes = new ArrayList<>();
             allAttributes.addAll(entry.getKey());
             allAttributes.addAll(entry.getValue());
@@ -338,7 +308,6 @@ public class CertifyNF {
             String tabName = tableName + "_" + n++;
             decomposedTables.add(tabName);
             String sqlQuery = GenerateSQL.createTempTable(tableName, tabName, allAttributes);
-            //System.out.println(sqlQuery);
             DbConnection.execute(sqlQuery);
         }
 
@@ -356,7 +325,6 @@ public class CertifyNF {
 
         // Join the decomposed tables and verify the cout with the original table
         String sqlQuery = GenerateSQL.getCountJoinTables(decomposedTables, foreignKeys);
-        //System.out.println(sqlQuery);
         ResultSet rs = DbConnection.executeQuery(sqlQuery);
         int count1 = 0;
         if (rs.next()) {
@@ -383,8 +351,7 @@ public class CertifyNF {
         	Map<List<String>, List<String>> relation = decompositionList.get(iter);
         	int j = 0;
         	StringBuilder stringBuilder = new StringBuilder();
-    		for(Entry<List<String>, List<String>> entry : relation.entrySet()) {  
-                //System.out.println(entry.getKey()+"："+entry.getValue());
+    		for(Map.Entry<List<String>, List<String>> entry : relation.entrySet()) {
     			j++;
     			Output.writeResult(" "+decomposedTableNameList.get(iter) + "_" + j + "(");
     			
@@ -397,23 +364,27 @@ public class CertifyNF {
     				if (i == ck.size() - 1) {
 						if (nk.size() == 0) {
 							Output.writeResult(ck.get(i));
-						}else {
+						}
+                        else {
 							Output.writeResult(ck.get(i) + ",");
 						}
-					}else {
-						Output.writeResult(ck.get(i)+",");
+					}
+                    else {
+						Output.writeResult(ck.get(i) + ",");
 					}
 				}
     			
     			for (int i = 0; i < nk.size(); i++) {
-    				if (i==nk.size()-1) {
+    				if (i == nk.size() - 1) {
 						Output.writeResult(nk.get(i));
-					}else{
-						Output.writeResult(nk.get(i)+",");
+					}
+                    else {
+						Output.writeResult(nk.get(i) + ",");
 					}
 				}
     			Output.writeResult(")\n");
-            } 
+            }
+
     		String verifyFlag = "NO";
     		if (decompositionVerification.get(iter)) {
 				verifyFlag = "YES";
@@ -421,7 +392,7 @@ public class CertifyNF {
     		
     		stringBuilder.deleteCharAt(stringBuilder.length()-1);
     		Output.writeResult("Verification:\n");
-    		Output.writeResult(" "+decomposedTableNameList.get(iter) + " = join(" + stringBuilder.toString()+")? " + verifyFlag + "\n");
+    		Output.writeResult(" " + decomposedTableNameList.get(iter) + " = join(" + stringBuilder.toString()+")? " + verifyFlag + "\n");
     		
         }
 	}
@@ -476,34 +447,26 @@ public class CertifyNF {
                 }
                 else if (!check1NF_nulls(tableName, candidateKey)) {
                     explanation = "not 1NF, null keys";
-                    //System.out.println(explanation);
                 }
                 else if (!check1NF_duplicates(tableName, candidateKey)) {
                     explanation = "not 1NF, duplicate keys";
-                    //System.out.println(explanation);
                 }
                 else {
                     partialFD = check2NF(tableName, candidateKey, nonKey);
                     if (!partialFD.isEmpty()) {
                         explanation = "not 2NF, ";
-                        ///System.err.println("Table " + tableName + " not in 2NF\n");
 
                         for (Map.Entry<List<String>, List<String>> entry : partialFD.entrySet()) {
-
                             for (String key : entry.getKey()) {
                                 explanation += key;
-                                //System.out.print(key + " ");
                             }
                             explanation += " -> ";
-                            //System.out.print("->");
+
                             for (String nKey : entry.getValue()) {
-                                //System.out.print(" " + nKey);
                                 explanation += nKey;
                             }
-                            //System.out.println();
                             explanation += ", ";
                         }
-
 
                         // decompose the table
                         relations = decomposeTo2NF(tableName, candidateKey, nonKey, partialFD);
@@ -515,22 +478,15 @@ public class CertifyNF {
                     else {
                         transitiveFD = check3NF(tableName, nonKey);
                         if (!transitiveFD.isEmpty()) {
-                            //flag3NF = true;
                             explanation = "not 3NF, ";
-                            //System.out.println("Table " + tableName + " not in 3NF\n");
                             for (Map.Entry<List<String>, List<String>> entry : transitiveFD.entrySet()) {
-
                                 for (String key : entry.getKey()) {
-                                    //System.out.print(key + " ");
                                     explanation += key;
                                 }
-                                //System.out.print("->");
                                 explanation += " -> ";
                                 for (String nKey : entry.getValue()) {
-                                    //System.out.print(" " + nKey);
                                     explanation += nKey;
                                 }
-                                //System.out.println();
                                 explanation +=", ";
                             }
 
@@ -542,7 +498,6 @@ public class CertifyNF {
                         }
                         else {
                             flag3NF = true;
-                            System.out.println("Table " + tableName + " is in 3NF");
                         }
                     }
                 }
@@ -554,6 +509,7 @@ public class CertifyNF {
             
             if (flag3NF == true) {
 				Output.writeResult("\tY\n");
+                System.out.println("Table " + tableName + " is in 3NF");
 			}
             else {
 				Output.writeResult("\tN\t" + explanation + "\n");
