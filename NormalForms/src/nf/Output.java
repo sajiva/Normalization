@@ -1,8 +1,14 @@
 package nf;
+/**********************************************************************************************/
+/* COSC6340: Database Systems                                                                 */
+/* Project: Discovering Functional Dependencies and Certifying Normal Forms with SQL Queries  */
+/* Project team: Sajiva Pradhan (1007766), Xiang Xu (1356333)                                 */
+/**********************************************************************************************/
 
 import java.io.FileWriter;
 import java.io.IOException;
 
+// Print the output in text file
 public class Output {
 
 	static String ofilename = "NF.txt";

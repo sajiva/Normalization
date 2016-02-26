@@ -1,10 +1,16 @@
 package nf;
+/**********************************************************************************************/
+/* COSC6340: Database Systems                                                                 */
+/* Project: Discovering Functional Dependencies and Certifying Normal Forms with SQL Queries  */
+/* Project team: Sajiva Pradhan (1007766), Xiang Xu (1356333)                                 */
+/**********************************************************************************************/
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+// Parse command line and read input file to extract table schemas
 public class ArgParser {
 
 	public static List<String> tableNames = new ArrayList<String>();
@@ -42,28 +48,34 @@ public class ArgParser {
 
 			while (null != line) {
 				// parse the line
-				Vector<Integer> ps_leftparenthesis = indexesOf(line, '(');
-				Vector<Integer> ps_rightparenthesis = indexesOf(line, ')');
-				Vector<Integer> ps_comma;
+                if (!line.isEmpty()) {
+                    Vector<Integer> ps_leftparenthesis = indexesOf(line, '(');
+                    Vector<Integer> ps_rightparenthesis = indexesOf(line, ')');
+                    Vector<Integer> ps_comma;
 
-				//get table name
-				String tabname = line.substring(0, ps_leftparenthesis.get(0));
-				System.out.println("Table name: " + tabname);
-				tableNames.add(tabname);
-				
-				//get the substring
-				String sublineStr = line.substring(ps_leftparenthesis.get(0)+1, ps_rightparenthesis.get(ps_rightparenthesis.size()-1));
-				sublineStr = ',' + sublineStr + ',';
-				ps_comma = indexesOf(sublineStr, ',');
-				Vector<Integer> ps_k = indexesOf(sublineStr, 'k');
-				//get candidate key
-				ArrayList<String> ck = getCandidateKeyfromLine(sublineStr, ps_comma, ps_k);
-				//get non-attribute key
-				ArrayList<String> nk = getNoneKeyAttributes(sublineStr, ps_comma);
-				
-				// add candidate key and non-attribute key to lists
-				candidateKeys.add(ck);
-				nonKeyAttributes.add(nk);
+                    if (!(ps_leftparenthesis.size() == 0) && !(ps_rightparenthesis.size() == 0)) {
+                        //get table name
+                        String tabname = line.substring(0, ps_leftparenthesis.get(0));
+                        System.out.println("Table name: " + tabname);
+                        tableNames.add(tabname);
+
+                        //get the substring
+                        String sublineStr = line.substring(ps_leftparenthesis.get(0) + 1, ps_rightparenthesis.get(ps_rightparenthesis.size() - 1));
+                        sublineStr = ',' + sublineStr + ',';
+                        ps_comma = indexesOf(sublineStr, ',');
+                        Vector<Integer> ps_k = indexesOf(sublineStr, 'k');
+                        //get candidate key
+                        ArrayList<String> ck = getCandidateKeyfromLine(sublineStr, ps_comma, ps_k);
+                        //get non-attribute key
+                        ArrayList<String> nk = getNoneKeyAttributes(sublineStr, ps_comma);
+
+                        // add candidate key and non-attribute key to lists
+                        candidateKeys.add(ck);
+                        nonKeyAttributes.add(nk);
+                    } else {
+                        System.out.println("Skipping table: " + line);
+                    }
+                }
 				
 				// read second line
 				line = bReader.readLine();
@@ -73,7 +85,6 @@ public class ArgParser {
 		}
         catch (IOException e) {
 			System.err.println("Cannot read file, pls check path!");
-			e.printStackTrace();
 			return false;
 		}
 		

@@ -1,10 +1,16 @@
 package nf;
+/**********************************************************************************************/
+/* COSC6340: Database Systems                                                                 */
+/* Project: Discovering Functional Dependencies and Certifying Normal Forms with SQL Queries  */
+/* Project team: Sajiva Pradhan (1007766), Xiang Xu (1356333)                                 */
+/**********************************************************************************************/
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
 
+// Generate SQL queries used in the program
 public class GenerateSQL {
 
 	public static void createFile() throws IOException{
@@ -17,7 +23,6 @@ public class GenerateSQL {
             Files.write(Paths.get("NF.sql"), sqlQuery.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
             System.err.println("Error writing to file");
-            e.printStackTrace();
         }
     }
 
