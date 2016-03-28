@@ -232,7 +232,7 @@ public class CertifyNF {
 
                                 if (count1 == count2) {
                                     if (mapFDs.containsKey(subsetNonKeys)){
-                                        List<String> nonKeys = mapFDs.get(subsetNonKeys);
+                                        ArrayList<String> nonKeys = (ArrayList<String>) mapFDs.get(subsetNonKeys);
                                         nonKeys.add(nKey);
                                         mapFDs.replace(subsetNonKeys, nonKeys);
                                     }
@@ -293,6 +293,47 @@ public class CertifyNF {
         return T;
     }
 
+    public static Map<List<String>, List<String>> decompose3NF(String tabName, List<String> candidateKey, List<String> nonKeyAttribute,
+            Map<List<String>, List<String>> partialFD) throws SQLException {
+
+	List<String> ck1 = candidateKey;
+	List<String> nck1 = nonKeyAttribute;
+	
+	// get the first key in the hash map
+	List<String> ck2 = partialFD.keySet().iterator().next();
+	// get the value from the hash map
+	List<String> nck2 = partialFD.get(ck2);
+	
+	nck1.removeAll(nck2);
+	
+	Map<List<String>, List<String>> pFD1 = check3NF(tabName, nck1);
+	Map<List<String>, List<String>> pFD2 = check3NF(tabName, nck2);
+	
+	Map<List<String>, List<String>> T = new LinkedHashMap<List<String>, List<String>>();
+	Map<List<String>, List<String>> T1 = new LinkedHashMap<List<String>, List<String>>();
+	Map<List<String>, List<String>> T2 = new LinkedHashMap<List<String>, List<String>>();
+	
+	if (!pFD1.isEmpty()) {
+	T1 = decompose(tabName, ck1, nck1, pFD1);
+	T.putAll(T1);
+	}
+	else {
+	T1.put(ck1, nck1);
+	T.putAll(T1);
+	}
+	
+	if (!pFD2.isEmpty()) {
+	T2 = decompose(tabName, ck2, nck2, pFD2);
+	T.putAll(T2);
+	}
+	else {
+	T2.put(ck2, nck2);
+	T.putAll(T2);
+	}
+	
+	return T;
+}
+    
     // verify the decomposition
     public static boolean decompositionVerify(Map<List<String>, List<String>> relations, String tableName) throws SQLException {
 
@@ -503,7 +544,7 @@ public class CertifyNF {
                             }
                             explanation = explanation.substring(0, explanation.length() - 2);
 
-                            relations = decompose(tableName, candidateKey, nonKey, transitiveFD);
+                            relations = decompose3NF(tableName, candidateKey, nonKey, transitiveFD);
                             Boolean flag = decompositionVerify(relations, tableName);
                             decompositionList.add(relations);
                             decomposedTableNameList.add(tableName);
